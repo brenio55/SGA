@@ -1,6 +1,98 @@
 .profileLeft {
-  height: 100dvh;
+  max-height: 98dvh;
   background: #e3e3e3;
   width: 270px;
   margin-top: 2px;
+
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #b7b7b7;
+  overflow: auto;
+}
+
+.profileLeftNotifications{
+  width: 100%;
+  background-color: #d0d0d0;
+  padding-bottom: 15px;
+  min-height: 260px;
+}
+
+.profileLeftNotifications p, .profileLeftNotifications h3{
+    padding-left: 15px;
+}
+
+.profileImage img {
+  width: 180px;
+  height: 180px;
+  border-radius: 20px;
+  border: 1px solid #c1c1c1;
+}
+
+.profileImage {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.profileFullName {
+  margin-bottom: 2px;
+}
+
+.profileDept {
+  font-style: italic;
+}
+
+/* Elemento | http://localhost:5173/ */
+
+.profileInformation {
+  text-align: center;
+}
+
+
+/* Inline | http://localhost:5173/ */
+
+.profileLeftNotifications {
+  /* background-color: grey; */
+  margin-top: 25px;
+  background-color: #dbdbdb;
+}
+
+/* Inline | http://localhost:5173/ */
+
+.profileLeftBottomInfo {
+  height: 130px;
+  width: 100%;
+  background: aqua;
+  position: relative;
+}
+
+/* Inline | http://localhost:5173/ */
+
+.profileLeftNotifications {
+  /* height: 260px; */
+  height: 438px;
+}
+
+
+/* Inline | http://localhost:5173/ */
+
+.profileLeftBottomInfo button {
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-size: 17px;
+  color: gray;
+  transition: all 0.1s;
+}
+
+.profileLeftBottomInfo button:hover {
+transition: all 0.15s;
+color: white;
+background: purple;
+cursor: pointer;
+font-size: 15px;
 }

@@ -3,32 +3,3 @@
 
 img {
 }
-
-.profileImage img {
-  width: 180px;
-  height: 180px;
-  border-radius: 20px;
-  border: 1px solid #c1c1c1;
-}
-
-.profileImage {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.profileFullName {
-  margin-bottom: 2px;
-}
-
-.profileDept {
-  font-style: italic;
-}
-
-/* Elemento | http://localhost:5173/ */
-
-.profileInformation {
-  text-align: center;
-}
