@@ -16,7 +16,7 @@
   width: 100%;
   background-color: #d0d0d0;
   padding-bottom: 15px;
-  min-height: 260px;
+  /* min-height: 260px; */
 }
 
 .profileLeftNotifications p, .profileLeftNotifications h3{
@@ -73,8 +73,8 @@
 /* Inline | http://localhost:5173/ */
 
 .profileLeftNotifications {
-  /* height: 260px; */
-  height: 438px;
+  height: 260px;
+  /* height: 438px; */
 }
 
 

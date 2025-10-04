@@ -1,5 +1,6 @@
-
-/* Inline | http://localhost:5173/ */
-
-img {
+.rSideHome {
+  width: 70%;
+  background: #fffdf7;
+  margin-top: 2px;
+  padding-left: 30px;
 }
