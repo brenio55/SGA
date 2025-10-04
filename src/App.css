@@ -3,4 +3,15 @@
   background: #fffdf7;
   margin-top: 2px;
   padding-left: 30px;
+  max-height: 100vh;
+  overflow-y: scroll;
+  padding-top: 0px;
+}
+
+/* Inline | http://localhost:5173/ */
+
+.rSideHome p:first-child {
+  font-size: 13px;
+  color: grey;
+  font-family: monospace;
 }

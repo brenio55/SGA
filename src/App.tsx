@@ -12,7 +12,22 @@ function App() {
       <main className="">
         <ProfileLeft></ProfileLeft>
         <div className="rSideHome">
-          <Notification></Notification>
+          <p>Novas notificações recebidas</p>
+          <div>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+            <Notification></Notification>
+          </div>
         </div>
       </main>
       <footer>
