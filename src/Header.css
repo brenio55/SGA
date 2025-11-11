@@ -1,7 +1,161 @@
-.topInfo{
-    display: flex;
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header__container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__logo {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.header__logo-icon {
+  font-size: 24px;
+}
+
+.header__brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.header__subtitle {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.9;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.header__datetime {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header__date,
+.header__time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.header__date:hover,
+.header__time:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.header__date-icon,
+.header__time-icon {
+  font-size: 16px;
+}
+
+.header__date-text,
+.header__time-text {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header__container {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header__brand {
+    width: 100%;
+  }
+
+  .header__datetime {
+    width: 100%;
     justify-content: space-between;
-    padding-left: 5px;
-    padding-right: 5px;
-    font-size: 9px;
+    gap: 12px;
+  }
+
+  .header__date,
+  .header__time {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+  }
+
+  .header__date-text {
+    font-size: 12px;
+  }
+
+  .header__time-text {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .header__title {
+    font-size: 20px;
+  }
+
+  .header__subtitle {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header__datetime {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header__date,
+  .header__time {
+    width: 100%;
+  }
+
+  .header__date-text {
+    font-size: 11px;
+  }
 }
