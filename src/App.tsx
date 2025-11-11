@@ -82,7 +82,6 @@ function App() {
         <div className="app__content">
           <div className="app__content-header">
             <h2 className="app__content-title">
-              <span className="app__content-icon">📬</span>
               Notificações Recebidas
             </h2>
             <p className="app__content-subtitle">
@@ -102,7 +101,7 @@ function App() {
               ))
             ) : (
               <div className="app__empty-state">
-                <span className="app__empty-icon">📭</span>
+                <span className="app__empty-icon">—</span>
                 <p className="app__empty-text">Nenhuma notificação disponível</p>
               </div>
             )}

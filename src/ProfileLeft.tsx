@@ -64,11 +64,9 @@ function ProfileLeft() {
         <div className="profile-sidebar__info">
           <h3 className="profile-sidebar__name">{user.fullName}</h3>
           <p className="profile-sidebar__role">
-            <span className="profile-sidebar__role-icon">💼</span>
             {user.role}
           </p>
           <p className="profile-sidebar__department">
-            <span className="profile-sidebar__department-icon">🏢</span>
             {user.department}
           </p>
         </div>
@@ -77,7 +75,6 @@ function ProfileLeft() {
       <div className="profile-sidebar__stats">
         <div className="profile-sidebar__stats-header">
           <h3 className="profile-sidebar__stats-title">
-            <span className="profile-sidebar__stats-icon">🔔</span>
             Notificações
           </h3>
           <div className="profile-sidebar__stats-badge">
@@ -114,10 +111,7 @@ function ProfileLeft() {
               <span>Carregando...</span>
             </>
           ) : (
-            <>
-              <span className="profile-sidebar__refresh-icon">🔄</span>
-              <span>Recarregar Atualizações</span>
-            </>
+            <span>Recarregar Atualizações</span>
           )}
         </button>
       </div>

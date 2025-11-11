@@ -1,12 +1,12 @@
 .notification-card {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -19,22 +19,21 @@
   bottom: 0;
   width: 4px;
   background: #e5e7eb;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease;
 }
 
 .notification-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   border-color: #d1d5db;
 }
 
 .notification-card--expanded {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Status colors */
 .notification-status--pending::before {
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  background: #9b59b6;
 }
 
 .notification-status--read::before {
@@ -42,11 +41,11 @@
 }
 
 .notification-status--accepted::before {
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  background: #27ae60;
 }
 
 .notification-status--rejected::before {
-  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  background: #e74c3c;
 }
 
 .notification-card__header {
@@ -92,32 +91,17 @@
 }
 
 .notification-badge--new {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: #9b59b6;
   color: white;
-  animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
 
 .notification-card__department {
   margin: 0;
   font-size: 13px;
   color: #6b7280;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
-.notification-card__department-icon {
-  font-size: 14px;
-}
 
 .notification-card__right {
   display: flex;
@@ -136,9 +120,6 @@
   color: #374151;
 }
 
-.notification-card__time-icon {
-  font-size: 14px;
-}
 
 .notification-card__type {
   display: inline-block;
@@ -156,29 +137,20 @@
 }
 
 .notification-type--info {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #e8d5f2;
+  color: #7d3c98;
 }
 
 .notification-type--important {
-  background: #fef3c7;
-  color: #92400e;
+  background: #f4e6ff;
+  color: #8e44ad;
 }
 
 .notification-type--urgent {
-  background: #fee2e2;
-  color: #991b1b;
-  animation: urgent-pulse 2s infinite;
+  background: #fce4ec;
+  color: #c0392b;
 }
 
-@keyframes urgent-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
 
 .notification-card__body {
   margin-top: 16px;
@@ -206,9 +178,6 @@
 }
 
 .notification-card__date {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-size: 12px;
   color: #9ca3af;
   margin-bottom: 16px;
@@ -236,25 +205,21 @@
 }
 
 .notification-button--accept {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #27ae60;
   color: white;
 }
 
 .notification-button--accept:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: #229954;
 }
 
 .notification-button--reject {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: #e74c3c;
   color: white;
 }
 
 .notification-button--reject:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  background: #c0392b;
 }
 
 .notification-card__status-message {

@@ -31,16 +31,9 @@
 .app__content-title {
   margin: 0 0 8px 0;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   color: #111827;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   letter-spacing: -0.5px;
-}
-
-.app__content-icon {
-  font-size: 32px;
 }
 
 .app__content-subtitle {
@@ -64,14 +57,15 @@
   padding: 80px 20px;
   text-align: center;
   background: white;
-  border-radius: 12px;
-  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .app__empty-icon {
-  font-size: 64px;
+  font-size: 48px;
   margin-bottom: 16px;
-  opacity: 0.5;
+  opacity: 0.4;
+  color: #9b59b6;
 }
 
 .app__empty-text {

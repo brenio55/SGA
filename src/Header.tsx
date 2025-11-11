@@ -34,7 +34,7 @@ function Header() {
       <div className="header__container">
         <div className="header__brand">
           <div className="header__logo">
-            <span className="header__logo-icon">⚡</span>
+            <span className="header__logo-icon">D</span>
           </div>
           <div className="header__brand-text">
             <h1 className="header__title">DiVSeC</h1>
@@ -44,11 +44,9 @@ function Header() {
         
         <div className="header__datetime">
           <div className="header__date">
-            <span className="header__date-icon">📅</span>
             <span className="header__date-text">{formatDate(currentDateTime)}</span>
           </div>
           <div className="header__time">
-            <span className="header__time-icon">🕐</span>
             <span className="header__time-text">{formatTime(currentDateTime)}</span>
           </div>
         </div>

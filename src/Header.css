@@ -1,8 +1,8 @@
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #9b59b6;
   color: white;
   padding: 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -27,13 +27,12 @@
 .header__logo {
   width: 48px;
   height: 48px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .header__logo-icon {
@@ -49,7 +48,7 @@
 .header__title {
   margin: 0;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.5px;
   line-height: 1.2;
 }
@@ -74,30 +73,29 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   padding: 8px 16px;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease;
 }
 
 .header__date:hover,
 .header__time:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.header__date-icon,
-.header__time-icon {
-  font-size: 16px;
-}
 
 .header__date-text,
 .header__time-text {
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.header__date-icon,
+.header__time-icon {
+  display: none;
 }
 
 /* Responsive */

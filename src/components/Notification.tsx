@@ -93,13 +93,11 @@ function Notification({
             )}
           </div>
           <p className="notification-card__department">
-            <span className="notification-card__department-icon">🏢</span>
             {mockNotification.department}
           </p>
         </div>
         <div className="notification-card__right">
           <div className="notification-card__time">
-            <span className="notification-card__time-icon">🕐</span>
             {mockNotification.formatTime()}
           </div>
           <span className={`notification-card__type ${getTypeClass()}`}>
@@ -114,7 +112,7 @@ function Notification({
         <div className="notification-card__body">
           <p className="notification-card__description">{mockNotification.description}</p>
           <div className="notification-card__date">
-            <span>📅</span> {mockNotification.formatDate()}
+            {mockNotification.formatDate()}
           </div>
           
           {mockNotification.requiresAcceptance && localStatus === NotificationStatus.PENDING && (
