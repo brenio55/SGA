@@ -12,11 +12,36 @@
   overflow-y: auto;
 }
 
+.admin-layout__nav-header {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-layout__back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #edf2f7;
+  color: #2d3748;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.admin-layout__back-button:hover {
+  background: #e2e8f0;
+  color: #1a202c;
+}
+
 .admin-layout__nav-title {
   font-size: 18px;
   font-weight: 600;
   color: #2d3748;
-  margin: 0 0 16px 0;
+  margin: 16px 0;
   padding-bottom: 16px;
   border-bottom: 2px solid #e2e8f0;
 }

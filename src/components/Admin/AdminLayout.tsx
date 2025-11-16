@@ -52,6 +52,11 @@ function AdminLayout({ children }: AdminLayoutProps) {
     <div className="admin-layout">
       <aside className="admin-layout__sidebar">
         <nav className="admin-layout__nav">
+          <div className="admin-layout__nav-header">
+            <Link to="/" className="admin-layout__back-button">
+              ← Voltar
+            </Link>
+          </div>
           <h2 className="admin-layout__nav-title">Menu</h2>
           <ul className="admin-layout__nav-list">
             {menuItems.map((item) => {

@@ -4,8 +4,17 @@ import bcrypt from 'bcrypt';
 export const getAllUsers = async (req, res) => {
   try {
     const { company_id } = req.query;
-    const users = await User.findAll(company_id);
-    res.json(users);
+    // Converter para número se fornecido, caso contrário null
+    const companyId = company_id && company_id !== '' ? Number(company_id) : null;
+    const users = await User.findAll(companyId);
+    
+    // Remover senhas dos usuários
+    const usersWithoutPasswords = users.map(u => {
+      const { password, ...userWithoutPassword } = u;
+      return userWithoutPassword;
+    });
+    
+    res.json(usersWithoutPasswords);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

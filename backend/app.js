@@ -19,8 +19,14 @@ import groupRoutes from './routes/groupRoutes.js';
 const app = express();
 const port = 3001;
 
+// Middleware de CORS
 app.use(cors('*'));
-app.use(express.json());
+
+// For JSON payloads - limite aumentado para suportar imagens base64
+app.use(express.json({ limit: '50mb' })); 
+
+// For URL-encoded payloads
+app.use(express.urlencoded({ limit: '50mb', extended: true })); 
 
 // Middleware de logging (deve vir depois do express.json para capturar o body)
 app.use(requestLogger);

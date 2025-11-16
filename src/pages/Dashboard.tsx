@@ -1,94 +1,133 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '../Header'
 import ProfileLeft from '../ProfileLeft'
 import Notification from '../components/Notification'
 import { Notification as NotificationClass, NotificationType } from '../classes/Notification'
+import { useAuth } from '../contexts/AuthContext'
+import { notificationsApi } from '../services/api'
 import './Dashboard.css'
 
+interface NotificationData {
+  id: number
+  title: string
+  description: string
+  type: string
+  requires_acceptance: boolean
+  department_name?: string
+  created_at: string
+}
+
 function Dashboard() {
-  // Dados mockados de notificações (será substituído por dados da API)
-  const [notifications] = useState<NotificationClass[]>([
-    new NotificationClass(
-      "Atualização do Sistema de Gestão",
-      "Nova versão do sistema disponível. Por favor, revise as mudanças e confirme o aceite.",
-      "TI",
-      NotificationType.IMPORTANT,
-      true,
-      1
-    ),
-    new NotificationClass(
-      "Reunião de Planejamento Mensal",
-      "Reunião agendada para o dia 15/01 às 14:00. Confirme sua presença.",
-      "Operações",
-      NotificationType.NORMAL,
-      true,
-      2
-    ),
-    new NotificationClass(
-      "Aprovação de Orçamento Urgente",
-      "Necessária aprovação imediata do orçamento do Q1. Prazo: hoje às 18:00.",
-      "Financeiro",
-      NotificationType.URGENT,
-      true,
-      3
-    ),
-    new NotificationClass(
-      "Novo Processo de Recrutamento",
-      "Foi implementado um novo processo de recrutamento. Leia as diretrizes.",
-      "RH",
-      NotificationType.INFO,
-      false,
-      4
-    ),
-    new NotificationClass(
-      "Manutenção Programada",
-      "Sistema ficará indisponível no sábado das 02:00 às 06:00 para manutenção.",
-      "TI",
-      NotificationType.IMPORTANT,
-      false,
-      5
-    ),
-    new NotificationClass(
-      "Relatório Mensal Disponível",
-      "O relatório de desempenho do mês passado já está disponível para consulta.",
-      "Operações",
-      NotificationType.INFO,
-      false,
-      6
-    )
-  ])
+  const { user } = useAuth()
+  const [notifications, setNotifications] = useState<NotificationClass[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleAccept = (id: number | null) => {
-    console.log('Notificação aceita:', id)
-    // Aqui será feita a chamada à API
+  useEffect(() => {
+    if (user) {
+      loadNotifications()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.company_id])
+
+  const loadNotifications = async () => {
+    if (!user) return
+
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await notificationsApi.getForUser(user.id, user.company_id)
+      const notificationsList = Array.isArray(data) ? data : []
+
+      const mappedNotifications = notificationsList.map((notif: NotificationData) => {
+        return new NotificationClass(
+          notif.title,
+          notif.description,
+          notif.department_name || 'Geral',
+          notif.type as NotificationType,
+          notif.requires_acceptance,
+          notif.id
+        )
+      })
+
+      setNotifications(mappedNotifications)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar notificações')
+      console.error('Erro ao carregar notificações:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleReject = (id: number | null) => {
-    console.log('Notificação rejeitada:', id)
-    // Aqui será feita a chamada à API
+  const handleAccept = async (id: number | null) => {
+    if (!id || !user) return
+
+    try {
+      await notificationsApi.respond(id, user.id, 'accepted')
+      await loadNotifications()
+    } catch (err) {
+      console.error('Erro ao aceitar notificação:', err)
+    }
   }
 
-  const handleRead = (id: number | null) => {
-    console.log('Notificação lida:', id)
-    // Aqui será feita a chamada à API
+  const handleReject = async (id: number | null) => {
+    if (!id || !user) return
+
+    try {
+      await notificationsApi.respond(id, user.id, 'rejected')
+      await loadNotifications()
+    } catch (err) {
+      console.error('Erro ao rejeitar notificação:', err)
+    }
+  }
+
+  const handleRead = async (id: number | null) => {
+    if (!id || !user) return
+
+    try {
+      await notificationsApi.view(id, user.id)
+      await loadNotifications()
+    } catch (err) {
+      console.error('Erro ao marcar notificação como lida:', err)
+    }
   }
 
   return (
     <div className="app">
       <Header />
       <main className="app__main">
-        <ProfileLeft />
+        <ProfileLeft onRefresh={loadNotifications} />
         <div className="app__content">
           <div className="app__content-header">
             <h2 className="app__content-title">
               Notificações Recebidas
             </h2>
             <p className="app__content-subtitle">
-              {notifications.length} {notifications.length === 1 ? 'notificação' : 'notificações'} disponíveis
+              {loading ? 'Carregando...' : (
+                <>
+                  {notifications.length} {notifications.length === 1 ? 'notificação' : 'notificações'} disponíveis
+                </>
+              )}
             </p>
           </div>
+          {error && (
+            <div style={{ 
+              padding: '16px', 
+              background: '#fed7d7', 
+              color: '#c53030', 
+              borderRadius: '8px',
+              marginBottom: '16px'
+            }}>
+              {error}
+            </div>
+          )}
           <div className="app__notifications-list">
-            {notifications.length > 0 ? (
+            {loading ? (
+              <div className="app__empty-state">
+                <span className="app__empty-icon">⟳</span>
+                <p className="app__empty-text">Carregando notificações...</p>
+              </div>
+            ) : notifications.length > 0 ? (
               notifications.map((notification) => (
                 <Notification
                   key={notification.id}

@@ -56,8 +56,11 @@ function AdminUsers() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (currentUser) {
+      loadData()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id, currentUser?.role, currentUser?.company_id])
 
   useEffect(() => {
     if (formData.department_id) {
@@ -71,8 +74,16 @@ function AdminUsers() {
   const loadData = async () => {
     try {
       setLoading(true)
+      setError(null)
+      
+      // Se for super_admin, não filtrar por company_id (ver todos)
+      // Se for admin normal, filtrar pela empresa
+      const companyIdForFilter = currentUser?.role === UserRole.SUPER_ADMIN 
+        ? undefined 
+        : currentUser?.company_id
+
       const [usersData, companiesData, departmentsData] = await Promise.all([
-        usersApi.getAll(currentUser?.company_id),
+        usersApi.getAll(companyIdForFilter),
         companiesApi.getAll(),
         departmentsApi.getAll(currentUser?.company_id),
       ])
@@ -81,7 +92,9 @@ function AdminUsers() {
       setCompanies(Array.isArray(companiesData) ? companiesData : [])
       setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados'
+      setError(errorMessage)
+      console.error('Erro ao carregar dados:', err)
     } finally {
       setLoading(false)
     }
