@@ -52,9 +52,15 @@ class User {
 
   static async create(data) {
     const { company_id, department_id, group_id, full_name, role, email, password, image_base64 } = data;
+    
+    // Converter undefined para null para campos opcionais
+    const deptId = department_id !== undefined ? department_id : null;
+    const grpId = group_id !== undefined ? group_id : null;
+    const imgBase64 = image_base64 !== undefined ? image_base64 : null;
+    
     const result = await db.db`
       INSERT INTO users (company_id, department_id, group_id, full_name, role, email, password, image_base64)
-      VALUES (${company_id}, ${department_id}, ${group_id}, ${full_name}, ${role}, ${email}, ${password}, ${image_base64})
+      VALUES (${company_id}, ${deptId}, ${grpId}, ${full_name}, ${role || 'user'}, ${email}, ${password}, ${imgBase64})
       RETURNING id, company_id, department_id, group_id, full_name, role, email, image_base64, created_at, updated_at
     `;
     return result[0];
