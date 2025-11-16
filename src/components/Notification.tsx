@@ -24,6 +24,9 @@ function Notification({
     true
   )
 
+  // Sempre usar a notificação real se disponível, caso contrário usar o mock
+  const currentNotification = notification || mockNotification
+
   const [isExpanded, setIsExpanded] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
   // Usar o status da notificação passada como prop, ou o status padrão
@@ -38,7 +41,7 @@ function Notification({
     }
   }, [notification?.status])
 
-  const descriptionLength = mockNotification.description?.length || 0
+  const descriptionLength = currentNotification.description?.length || 0
   const shouldShowPopup = descriptionLength > 255
 
   const handleAccept = (e?: React.MouseEvent) => {
@@ -46,7 +49,7 @@ function Notification({
       e.stopPropagation()
     }
     if (onAccept) {
-      onAccept(mockNotification.id)
+      onAccept(currentNotification.id)
     }
     setLocalStatus(NotificationStatus.ACCEPTED)
   }
@@ -56,7 +59,7 @@ function Notification({
       e.stopPropagation()
     }
     if (onReject) {
-      onReject(mockNotification.id)
+      onReject(currentNotification.id)
     }
     setLocalStatus(NotificationStatus.REJECTED)
   }
@@ -64,43 +67,43 @@ function Notification({
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     
-    if (shouldShowPopup) {
-      setShowPopup(true)
-      // Só marcar como lida se não requer aceitação ou se já foi respondida
-      if (localStatus === NotificationStatus.PENDING && onRead && !mockNotification.requiresAcceptance) {
-        onRead(mockNotification.id)
-        setLocalStatus(NotificationStatus.READ)
-      }
-    } else {
-      if (!isExpanded) {
-        setIsExpanded(true)
-        // Só marcar como lida se não requer aceitação ou se já foi respondida
-        if (localStatus === NotificationStatus.PENDING && onRead && !mockNotification.requiresAcceptance) {
-          onRead(mockNotification.id)
-          setLocalStatus(NotificationStatus.READ)
-        }
-      } else {
-        setIsExpanded(false)
-      }
-    }
+          if (shouldShowPopup) {
+            setShowPopup(true)
+            // Só marcar como lida se não requer aceitação ou se já foi respondida
+            if (localStatus === NotificationStatus.PENDING && onRead && !currentNotification.requiresAcceptance) {
+              onRead(currentNotification.id)
+              setLocalStatus(NotificationStatus.READ)
+            }
+          } else {
+            if (!isExpanded) {
+              setIsExpanded(true)
+              // Só marcar como lida se não requer aceitação ou se já foi respondida
+              if (localStatus === NotificationStatus.PENDING && onRead && !currentNotification.requiresAcceptance) {
+                onRead(currentNotification.id)
+                setLocalStatus(NotificationStatus.READ)
+              }
+            } else {
+              setIsExpanded(false)
+            }
+          }
   }
 
   const handleClosePopup = () => {
     setShowPopup(false)
   }
 
-  const getTypeClass = () => {
-    switch (mockNotification.type) {
-      case NotificationType.URGENT:
-        return 'notification-type--urgent'
-      case NotificationType.IMPORTANT:
-        return 'notification-type--important'
-      case NotificationType.INFO:
-        return 'notification-type--info'
-      default:
-        return 'notification-type--normal'
-    }
-  }
+        const getTypeClass = () => {
+          switch (currentNotification.type) {
+            case NotificationType.URGENT:
+              return 'notification-type--urgent'
+            case NotificationType.IMPORTANT:
+              return 'notification-type--important'
+            case NotificationType.INFO:
+              return 'notification-type--info'
+            default:
+              return 'notification-type--normal'
+          }
+        }
 
   const getStatusClass = () => {
     switch (localStatus) {
@@ -124,36 +127,36 @@ function Notification({
         <div className="notification-card__header">
           <div className="notification-card__left">
             <div className="notification-card__title-section">
-              <h4 className="notification-card__title">{mockNotification.title}</h4>
-              <span className="notification-card__id">ID: {mockNotification.id || 'N/A'}</span>
+              <h4 className="notification-card__title">{currentNotification.title}</h4>
+              <span className="notification-card__id">ID: {currentNotification.id || 'N/A'}</span>
               {localStatus === NotificationStatus.PENDING && (
                 <span className="notification-badge notification-badge--new">Nova</span>
               )}
             </div>
             <p className="notification-card__department">
-              {mockNotification.department}
+              {currentNotification.department}
             </p>
           </div>
           <div className="notification-card__right">
             <div className="notification-card__time">
-              {mockNotification.formatTime()}
+              {currentNotification.formatTime()}
             </div>
             <span className={`notification-card__type ${getTypeClass()}`}>
-              {mockNotification.type === NotificationType.URGENT ? 'Urgente' :
-               mockNotification.type === NotificationType.IMPORTANT ? 'Importante' :
-               mockNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
+              {currentNotification.type === NotificationType.URGENT ? 'Urgente' :
+               currentNotification.type === NotificationType.IMPORTANT ? 'Importante' :
+               currentNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
             </span>
           </div>
         </div>
 
         {isExpanded && !shouldShowPopup && (
           <div className="notification-card__body">
-            <p className="notification-card__description">{mockNotification.description}</p>
+            <p className="notification-card__description">{currentNotification.description}</p>
             <div className="notification-card__date">
-              {mockNotification.formatDate()}
+              {currentNotification.formatDate()}
             </div>
-            
-            {mockNotification.requiresAcceptance && 
+
+            {currentNotification.requiresAcceptance &&
              (localStatus === NotificationStatus.PENDING || localStatus === NotificationStatus.READ) && (
               <div className="notification-card__actions">
                 <button 
@@ -188,10 +191,10 @@ function Notification({
         {isExpanded && shouldShowPopup && (
           <div className="notification-card__body">
             <p className="notification-card__description">
-              {mockNotification.description.substring(0, 255)}...
+              {currentNotification.description.substring(0, 255)}...
             </p>
             <div className="notification-card__date">
-              {mockNotification.formatDate()}
+              {currentNotification.formatDate()}
             </div>
             <button 
               className="notification-card__read-more"
@@ -206,26 +209,26 @@ function Notification({
         )}
       </div>
 
-      {showPopup && (
-        <div className="notification-popup-overlay" onClick={handleClosePopup}>
-          <div className="notification-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="notification-popup__header">
-              <h3 className="notification-popup__title">{mockNotification.title}</h3>
-              <button className="notification-popup__close" onClick={handleClosePopup}>×</button>
-            </div>
-            <div className="notification-popup__body">
-              <div className="notification-popup__meta">
-                <span className="notification-popup__department">{mockNotification.department}</span>
-                <span className="notification-popup__date">{mockNotification.formatDate()}</span>
-                <span className={`notification-popup__type ${getTypeClass()}`}>
-                  {mockNotification.type === NotificationType.URGENT ? 'Urgente' :
-                   mockNotification.type === NotificationType.IMPORTANT ? 'Importante' :
-                   mockNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
-                </span>
-              </div>
-              <p className="notification-popup__description">{mockNotification.description}</p>
-              
-              {mockNotification.requiresAcceptance && 
+            {showPopup && (
+              <div className="notification-popup-overlay" onClick={handleClosePopup}>
+                <div className="notification-popup" onClick={(e) => e.stopPropagation()}>
+                  <div className="notification-popup__header">
+                    <h3 className="notification-popup__title">{currentNotification.title}</h3>
+                    <button className="notification-popup__close" onClick={handleClosePopup}>×</button>
+                  </div>
+                  <div className="notification-popup__body">
+                    <div className="notification-popup__meta">
+                      <span className="notification-popup__department">{currentNotification.department}</span>
+                      <span className="notification-popup__date">{currentNotification.formatDate()}</span>
+                      <span className={`notification-popup__type ${getTypeClass()}`}>
+                        {currentNotification.type === NotificationType.URGENT ? 'Urgente' :
+                         currentNotification.type === NotificationType.IMPORTANT ? 'Importante' :
+                         currentNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
+                      </span>
+                    </div>
+                    <p className="notification-popup__description">{currentNotification.description}</p>
+
+                    {currentNotification.requiresAcceptance &&
                (localStatus === NotificationStatus.PENDING || localStatus === NotificationStatus.READ) && (
                 <div className="notification-popup__actions">
                   <button 

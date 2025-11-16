@@ -10,6 +10,8 @@ interface User {
   role: string
   email: string
   image_base64?: string
+  department_name?: string
+  group_name?: string
 }
 
 interface AuthContextType {
@@ -138,6 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: data.user.role,
         email: data.user.email,
         image_base64: data.user.image_base64,
+        department_name: data.user.department_name,
+        group_name: data.user.group_name,
       }
 
       setUser(userData)
@@ -168,6 +172,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: userWithoutPassword.role,
         email: userWithoutPassword.email,
         image_base64: userWithoutPassword.image_base64,
+        department_name: userWithoutPassword.department_name,
+        group_name: userWithoutPassword.group_name,
       }
 
       setUser(registeredUser)

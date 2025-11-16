@@ -143,6 +143,35 @@ class Notification {
       ORDER BY COALESCE(nv.viewed_at, nr.responded_at) DESC
     `;
   }
+
+  static async getStatsForUser(userId, companyId) {
+    // Retorna estatísticas de notificações pendentes do usuário agrupadas por departamento
+    // Apenas notificações que o usuário ainda não visualizou, aceitou ou rejeitou
+    return await db.db`
+      SELECT 
+        COALESCE(d.name, 'Geral') as department_name,
+        d.id as department_id,
+        d.color as department_color,
+        COUNT(*) as count
+      FROM notifications n
+      LEFT JOIN departments d ON n.department_id = d.id
+      INNER JOIN notification_targets nt ON n.id = nt.notification_id
+      LEFT JOIN users u ON (
+        (nt.target_type = 'user' AND nt.target_id = u.id) OR
+        (nt.target_type = 'department' AND nt.target_id = u.department_id) OR
+        (nt.target_type = 'group' AND nt.target_id = u.group_id) OR
+        (nt.target_type = 'all' AND n.company_id = u.company_id)
+      )
+      LEFT JOIN notification_views nv ON n.id = nv.notification_id AND nv.user_id = ${userId}
+      LEFT JOIN notification_responses nr ON n.id = nr.notification_id AND nr.user_id = ${userId}
+      WHERE u.id = ${userId} 
+        AND n.company_id = ${companyId}
+        AND nr.id IS NULL  -- Excluir notificações já respondidas
+        AND nv.id IS NULL  -- Excluir notificações já visualizadas
+      GROUP BY d.id, d.name, d.color
+      ORDER BY d.name
+    `;
+  }
 }
 
 export default Notification;

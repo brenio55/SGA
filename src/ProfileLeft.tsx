@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from './contexts/AuthContext'
-import { notificationsApi, departmentsApi } from './services/api'
+import { notificationsApi, usersApi } from './services/api'
 import "./ProfileLeft.css"
 
 interface NotificationStats {
@@ -14,59 +14,106 @@ interface ProfileLeftProps {
 }
 
 function ProfileLeft({ onRefresh }: ProfileLeftProps) {
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [loadingUser, setLoadingUser] = useState(true)
   const [notificationStats, setNotificationStats] = useState<NotificationStats[]>([])
   const [totalNotifications, setTotalNotifications] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
+  // Carregar dados do usuário ao montar o componente
   useEffect(() => {
-    loadNotificationStats()
-  }, [user])
+    if (user?.id) {
+      loadUserData()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
-  const loadNotificationStats = async () => {
-    if (!user) return
+  // Carregar estatísticas quando os dados do usuário estiverem prontos
+  useEffect(() => {
+    if (user?.id && user?.company_id && !loadingUser) {
+      loadNotificationStats()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.company_id, loadingUser])
+
+  const loadUserData = async () => {
+    if (!user?.id) {
+      setLoadingUser(false)
+      return
+    }
 
     try {
-      const [notificationsData, departmentsData] = await Promise.all([
-        notificationsApi.getForUser(user.id, user.company_id),
-        departmentsApi.getAll(user.company_id),
-      ])
+      setLoadingUser(true)
+      const userData = await usersApi.getById(user.id)
+      
+      // Atualizar o usuário no contexto com os dados mais recentes
+      if (userData && updateUser) {
+        updateUser({
+          id: userData.id,
+          company_id: userData.company_id,
+          department_id: userData.department_id,
+          group_id: userData.group_id,
+          full_name: userData.full_name,
+          role: userData.role,
+          email: userData.email,
+          image_base64: userData.image_base64,
+          department_name: userData.department_name,
+          group_name: userData.group_name,
+        })
+      }
+    } catch (err) {
+      console.error('Erro ao carregar dados do usuário:', err)
+      // Não mostrar erro aqui, apenas logar, pois o usuário pode já estar logado
+    } finally {
+      setLoadingUser(false)
+    }
+  }
 
-      const notifications = Array.isArray(notificationsData) ? notificationsData : []
-      const departments = Array.isArray(departmentsData) ? departmentsData : []
+  const loadNotificationStats = async () => {
+    if (!user?.id || !user?.company_id) {
+      setLoading(false)
+      return
+    }
 
-      // Agrupar notificações por departamento
-      const statsMap = new Map<string, { count: number; color: string }>()
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Usar a rota específica de estatísticas que retorna dados já agrupados
+      const statsData = await notificationsApi.getStatsForUser(user.id, user.company_id)
+      const stats = Array.isArray(statsData) ? statsData : []
 
-      notifications.forEach((notif: any) => {
-        const deptName = notif.department_name || 'Geral'
-        const dept = departments.find((d: any) => d.name === deptName)
-        const color = dept?.color || '#667eea'
-
-        if (statsMap.has(deptName)) {
-          const current = statsMap.get(deptName)!
-          statsMap.set(deptName, { count: current.count + 1, color })
-        } else {
-          statsMap.set(deptName, { count: 1, color })
-        }
-      })
-
-      const stats: NotificationStats[] = Array.from(statsMap.entries()).map(([department, data]) => ({
-        department,
-        ...data,
+      // Mapear os dados retornados para o formato esperado
+      const mappedStats: NotificationStats[] = stats.map((stat: any) => ({
+        department: stat.department_name || 'Geral',
+        count: Number(stat.count) || 0,
+        color: stat.department_color || '#667eea',
       }))
 
-      setNotificationStats(stats)
-      setTotalNotifications(notifications.length)
+      setNotificationStats(mappedStats)
+      
+      // Calcular total de notificações
+      const total = mappedStats.reduce((sum, stat) => sum + stat.count, 0)
+      setTotalNotifications(total)
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar estatísticas'
+      setError(errorMessage)
       console.error('Erro ao carregar estatísticas:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
     try {
-      await loadNotificationStats()
+      // Recarregar dados do usuário e estatísticas
+      await Promise.all([
+        loadUserData(),
+        loadNotificationStats()
+      ])
       if (onRefresh) {
         onRefresh()
       }
@@ -105,12 +152,14 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
         </div>
 
         <div className="profile-sidebar__info">
-          <h3 className="profile-sidebar__name">{user?.full_name || 'Usuário'}</h3>
+          <h3 className="profile-sidebar__name">
+            {loadingUser ? 'Carregando...' : (user?.full_name || 'Usuário')}
+          </h3>
           <p className="profile-sidebar__role">
-            {user?.role || 'N/A'}
+            {loadingUser ? '...' : (user?.role || 'N/A')}
           </p>
           <p className="profile-sidebar__department">
-            {user?.department_name || 'N/A'}
+            {loadingUser ? '...' : (user?.department_name || 'N/A')}
           </p>
         </div>
       </div>
@@ -121,12 +170,29 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
             Notificações
           </h3>
           <div className="profile-sidebar__stats-badge">
-            {totalNotifications}
+            {loading ? '...' : totalNotifications}
           </div>
         </div>
 
+        {error && (
+          <div style={{
+            padding: '8px',
+            background: '#fed7d7',
+            color: '#c53030',
+            borderRadius: '4px',
+            marginBottom: '8px',
+            fontSize: '12px'
+          }}>
+            {error}
+          </div>
+        )}
+
         <div className="profile-sidebar__stats-list">
-          {notificationStats.length > 0 ? (
+          {loading ? (
+            <div className="profile-sidebar__stat-item">
+              <span className="profile-sidebar__stat-label">Carregando...</span>
+            </div>
+          ) : notificationStats.length > 0 ? (
             notificationStats.map((stat, index) => (
               <div key={index} className="profile-sidebar__stat-item">
                 <div className="profile-sidebar__stat-info">
@@ -169,3 +235,4 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
 }
 
 export default ProfileLeft
+

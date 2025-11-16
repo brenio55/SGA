@@ -51,6 +51,16 @@ export const getNotificationsForUser = async (req, res) => {
   }
 };
 
+export const getNotificationStatsForUser = async (req, res) => {
+  try {
+    const { user_id, company_id } = req.params;
+    const stats = await Notification.getStatsForUser(user_id, company_id);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const createNotification = async (req, res) => {
   try {
     const { company_id, department_id, title, description, type, requires_acceptance, targets } = req.body;

@@ -78,7 +78,10 @@ export const createUser = async (req, res) => {
       image_base64
     });
 
-    const { password: _, ...userWithoutPassword } = user;
+    // Buscar usuário criado com department_name e group_name
+    const userWithNames = await User.findById(user.id);
+
+    const { password: _, ...userWithoutPassword } = userWithNames;
     res.status(201).json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -101,7 +104,10 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    const { password: _, ...userWithoutPassword } = user;
+    // Buscar usuário atualizado com department_name e group_name
+    const userWithNames = await User.findById(id);
+
+    const { password: _, ...userWithoutPassword } = userWithNames;
     res.json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ error: error.message });

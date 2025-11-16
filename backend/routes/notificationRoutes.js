@@ -6,6 +6,7 @@ const router = express.Router();
 router.get('/', notificationController.getAllNotifications);
 // Rotas específicas devem vir antes das rotas genéricas com :id
 router.get('/user/:user_id/company/:company_id', notificationController.getNotificationsForUser);
+router.get('/user/:user_id/company/:company_id/stats', notificationController.getNotificationStatsForUser);
 router.get('/user/:user_id/company/:company_id/viewed', notificationController.getViewedNotifications);
 router.post('/', notificationController.createNotification);
 

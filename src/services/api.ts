@@ -250,7 +250,9 @@ export const notificationsApi = {
     const query = groupBy ? `?group_by=${groupBy}` : ''
     return request(`/notifications/${id}/views${query}`)
   },
-  getViewedByUser: (userId: number, companyId: number) =>
-    request(`/notifications/user/${userId}/company/${companyId}/viewed`),
-}
+        getViewedByUser: (userId: number, companyId: number) =>
+          request(`/notifications/user/${userId}/company/${companyId}/viewed`),
+        getStatsForUser: (userId: number, companyId: number) =>
+          request(`/notifications/user/${userId}/company/${companyId}/stats`),
+      }
 
