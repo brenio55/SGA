@@ -33,6 +33,7 @@ interface User {
   id: number
   full_name: string
   email: string
+  company_id?: number
 }
 
 interface Company {
@@ -72,11 +73,18 @@ function AdminNotifications() {
   }, [])
 
   useEffect(() => {
-    // Carregar departamentos quando a empresa mudar (para super_admin)
-    if (formData.company_id && user?.role === UserRole.SUPER_ADMIN) {
-      loadDepartmentsForCompany(formData.company_id)
+    // Carregar departamentos quando a empresa mudar (para super_admin) ou quando o componente carregar (para outros)
+    if (user?.role === UserRole.SUPER_ADMIN) {
+      if (formData.company_id) {
+        loadDepartmentsForCompany(formData.company_id)
+      }
+    } else {
+      // Para não-super_admin, sempre carregar departamentos da empresa do usuário
+      if (user?.company_id) {
+        loadDepartmentsForCompany(user.company_id)
+      }
     }
-  }, [formData.company_id])
+  }, [formData.company_id, user?.company_id, user?.role])
 
   useEffect(() => {
     if (formData.target_type === 'group' && formData.selected_departments.length > 0) {
@@ -88,7 +96,11 @@ function AdminNotifications() {
 
   const loadDepartmentsForCompany = async (companyId: number) => {
     try {
-      const departmentsData = await departmentsApi.getAll(companyId)
+      // Para não-super_admin, sempre usar a empresa do usuário logado
+      const finalCompanyId = user?.role === UserRole.SUPER_ADMIN ? companyId : user?.company_id
+      if (!finalCompanyId) return
+      
+      const departmentsData = await departmentsApi.getAll(finalCompanyId)
       setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
     } catch (err) {
       console.error('Erro ao carregar departamentos:', err)
@@ -221,6 +233,12 @@ function AdminNotifications() {
       return
     }
 
+    // Para não-super_admin, garantir que company_id seja o do usuário
+    if (user?.role !== UserRole.SUPER_ADMIN && !user?.company_id) {
+      setError('Erro: usuário não possui empresa associada')
+      return
+    }
+
     // Validar targets baseado no tipo (apenas se tiver departamento selecionado)
     if (formData.department_id) {
       if (formData.target_type === 'department' && formData.selected_departments.length === 0) {
@@ -262,8 +280,13 @@ function AdminNotifications() {
         })
       }
 
+      // Para não-super_admin, sempre usar a empresa do usuário logado
+      const finalCompanyId = user?.role === UserRole.SUPER_ADMIN 
+        ? (formData.company_id || user!.company_id)
+        : user!.company_id
+
       await notificationsApi.create({
-        company_id: formData.company_id || user!.company_id,
+        company_id: finalCompanyId,
         department_id: formData.department_id ? Number(formData.department_id) : undefined,
         title: formData.title,
         description: formData.description,
@@ -431,12 +454,18 @@ function AdminNotifications() {
                 >
                   <option value="">Nenhum (Todos os usuários)</option>
                   {departments
-                    .filter(dept => 
-                      (!formData.company_id || dept.company_id === formData.company_id) &&
-                      (!departmentSearch || 
+                    .filter(dept => {
+                      // Para super_admin, filtrar pela empresa selecionada; para outros, pela empresa do usuário
+                      const companyFilter = user?.role === UserRole.SUPER_ADMIN
+                        ? (!formData.company_id || dept.company_id === formData.company_id)
+                        : (dept.company_id === user?.company_id)
+                      
+                      const searchFilter = !departmentSearch || 
                         dept.id.toString().includes(departmentSearch) ||
-                        dept.name.toLowerCase().includes(departmentSearch.toLowerCase()))
-                    )
+                        dept.name.toLowerCase().includes(departmentSearch.toLowerCase())
+                      
+                      return companyFilter && searchFilter
+                    })
                     .map((dept) => (
                       <option key={dept.id} value={dept.id}>
                         ID: {dept.id} - {dept.name}
@@ -548,26 +577,14 @@ function AdminNotifications() {
                 <div className="admin-notifications__field">
                   <label>Selecione Departamentos</label>
                   <div className="admin-notifications__checklist">
-                    {departments.map((dept) => (
-                      <label key={dept.id} className="admin-notifications__checkbox-item">
-                        <input
-                          type="checkbox"
-                          checked={formData.selected_departments.includes(dept.id)}
-                          onChange={() => handleDepartmentToggle(dept.id)}
-                        />
-                        {dept.name}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {formData.target_type === 'group' && (
-                <>
-                  <div className="admin-notifications__field">
-                    <label>Selecione Departamentos (para filtrar grupos)</label>
-                    <div className="admin-notifications__checklist">
-                      {departments.map((dept) => (
+                    {departments
+                      .filter(dept => {
+                        // Para super_admin, filtrar pela empresa selecionada; para outros, pela empresa do usuário
+                        return user?.role === UserRole.SUPER_ADMIN
+                          ? (!formData.company_id || dept.company_id === formData.company_id)
+                          : (dept.company_id === user?.company_id)
+                      })
+                      .map((dept) => (
                         <label key={dept.id} className="admin-notifications__checkbox-item">
                           <input
                             type="checkbox"
@@ -577,6 +594,32 @@ function AdminNotifications() {
                           {dept.name}
                         </label>
                       ))}
+                  </div>
+                </div>
+              )}
+
+              {formData.target_type === 'group' && (
+                <>
+                  <div className="admin-notifications__field">
+                    <label>Selecione Departamentos (para filtrar grupos)</label>
+                    <div className="admin-notifications__checklist">
+                      {departments
+                        .filter(dept => {
+                          // Para super_admin, filtrar pela empresa selecionada; para outros, pela empresa do usuário
+                          return user?.role === UserRole.SUPER_ADMIN
+                            ? (!formData.company_id || dept.company_id === formData.company_id)
+                            : (dept.company_id === user?.company_id)
+                        })
+                        .map((dept) => (
+                          <label key={dept.id} className="admin-notifications__checkbox-item">
+                            <input
+                              type="checkbox"
+                              checked={formData.selected_departments.includes(dept.id)}
+                              onChange={() => handleDepartmentToggle(dept.id)}
+                            />
+                            {dept.name}
+                          </label>
+                        ))}
                     </div>
                   </div>
                   {formData.selected_departments.length > 0 && (
@@ -609,16 +652,23 @@ function AdminNotifications() {
                 <div className="admin-notifications__field">
                   <label>Selecione Usuários</label>
                   <div className="admin-notifications__checklist">
-                    {users.map((usr) => (
-                      <label key={usr.id} className="admin-notifications__checkbox-item">
-                        <input
-                          type="checkbox"
-                          checked={formData.selected_users.includes(usr.id)}
-                          onChange={() => handleUserToggle(usr.id)}
-                        />
-                        {usr.full_name} ({usr.email})
-                      </label>
-                    ))}
+                    {users
+                      .filter(usr => {
+                        // Para super_admin, filtrar pela empresa selecionada; para outros, pela empresa do usuário
+                        return user?.role === UserRole.SUPER_ADMIN
+                          ? (!formData.company_id || usr.company_id === formData.company_id)
+                          : (usr.company_id === user?.company_id)
+                      })
+                      .map((usr) => (
+                        <label key={usr.id} className="admin-notifications__checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={formData.selected_users.includes(usr.id)}
+                            onChange={() => handleUserToggle(usr.id)}
+                          />
+                          {usr.full_name} ({usr.email})
+                        </label>
+                      ))}
                   </div>
                 </div>
               )}
