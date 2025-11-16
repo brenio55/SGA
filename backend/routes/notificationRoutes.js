@@ -4,16 +4,20 @@ import * as notificationController from '../controllers/notificationController.j
 const router = express.Router();
 
 router.get('/', notificationController.getAllNotifications);
-router.get('/:id', notificationController.getNotificationById);
+// Rotas específicas devem vir antes das rotas genéricas com :id
 router.get('/user/:user_id/company/:company_id', notificationController.getNotificationsForUser);
+router.get('/user/:user_id/company/:company_id/viewed', notificationController.getViewedNotifications);
 router.post('/', notificationController.createNotification);
-router.put('/:id', notificationController.updateNotification);
-router.delete('/:id', notificationController.deleteNotification);
 
-// Visualizações e respostas
+// Visualizações e respostas (antes das rotas com :id)
 router.post('/:id/view', notificationController.viewNotification);
 router.post('/:id/respond', notificationController.respondToNotification);
 router.get('/:id/views', notificationController.getNotificationViews);
+
+// Rotas genéricas com :id devem vir por último
+router.get('/:id', notificationController.getNotificationById);
+router.put('/:id', notificationController.updateNotification);
+router.delete('/:id', notificationController.deleteNotification);
 
 export default router;
 

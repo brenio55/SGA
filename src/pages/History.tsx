@@ -5,7 +5,7 @@ import Notification from '../components/Notification'
 import { Notification as NotificationClass, NotificationType, NotificationStatus } from '../classes/Notification'
 import { useAuth } from '../contexts/AuthContext'
 import { notificationsApi } from '../services/api'
-import './Dashboard.css'
+import './History.css'
 
 interface NotificationData {
   id: number
@@ -16,10 +16,11 @@ interface NotificationData {
   department_name?: string
   created_at: string
   user_response?: 'accepted' | 'rejected' | null
-  view_status?: 'read' | 'pending'
+  viewed_at: string
+  responded_at?: string
 }
 
-function Dashboard() {
+function History() {
   const { user } = useAuth()
   const [notifications, setNotifications] = useState<NotificationClass[]>([])
   const [loading, setLoading] = useState(true)
@@ -38,18 +39,16 @@ function Dashboard() {
     try {
       setLoading(true)
       setError(null)
-      const data = await notificationsApi.getForUser(user.id, user.company_id)
+      const data = await notificationsApi.getViewedByUser(user.id, user.company_id)
       const notificationsList = Array.isArray(data) ? data : []
 
       const mappedNotifications = notificationsList.map((notif: NotificationData) => {
-        // Determinar o status baseado na resposta do usuário e visualização
-        let status = NotificationStatus.PENDING
+        // Determinar o status baseado na resposta do usuário
+        let status = NotificationStatus.READ
         if (notif.user_response === 'accepted') {
           status = NotificationStatus.ACCEPTED
         } else if (notif.user_response === 'rejected') {
           status = NotificationStatus.REJECTED
-        } else if (notif.view_status === 'read') {
-          status = NotificationStatus.READ
         }
 
         const notification = new NotificationClass(
@@ -66,8 +65,8 @@ function Dashboard() {
 
       setNotifications(mappedNotifications)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar notificações')
-      console.error('Erro ao carregar notificações:', err)
+      setError(err instanceof Error ? err.message : 'Erro ao carregar histórico')
+      console.error('Erro ao carregar histórico:', err)
     } finally {
       setLoading(false)
     }
@@ -78,19 +77,9 @@ function Dashboard() {
 
     try {
       await notificationsApi.respond(id, user.id, 'accepted')
-      // Atualizar o estado local imediatamente
-      setNotifications(prev => prev.map(notif => {
-        if (notif.id === id) {
-          notif.status = NotificationStatus.ACCEPTED
-        }
-        return notif
-      }))
-      // Recarregar para garantir sincronização
       await loadNotifications()
     } catch (err) {
       console.error('Erro ao aceitar notificação:', err)
-      // Em caso de erro, recarregar para reverter estado
-      await loadNotifications()
     }
   }
 
@@ -99,31 +88,14 @@ function Dashboard() {
 
     try {
       await notificationsApi.respond(id, user.id, 'rejected')
-      // Atualizar o estado local imediatamente
-      setNotifications(prev => prev.map(notif => {
-        if (notif.id === id) {
-          notif.status = NotificationStatus.REJECTED
-        }
-        return notif
-      }))
-      // Recarregar para garantir sincronização
       await loadNotifications()
     } catch (err) {
       console.error('Erro ao rejeitar notificação:', err)
-      // Em caso de erro, recarregar para reverter estado
-      await loadNotifications()
     }
   }
 
   const handleRead = async (id: number | null) => {
-    if (!id || !user) return
-
-    try {
-      await notificationsApi.view(id, user.id)
-      // Não recarregar todas as notificações, apenas atualizar o estado local se necessário
-    } catch (err) {
-      console.error('Erro ao marcar notificação como lida:', err)
-    }
+    // Não fazer nada no histórico, pois todas já foram visualizadas
   }
 
   return (
@@ -134,35 +106,32 @@ function Dashboard() {
         <div className="app__content">
           <div className="app__content-header">
             <h2 className="app__content-title">
-              Notificações Recebidas
+              Histórico de Notificações
             </h2>
             <p className="app__content-subtitle">
               {loading ? 'Carregando...' : (
                 <>
-                  {notifications.length} {notifications.length === 1 ? 'notificação' : 'notificações'} disponíveis
+                  {notifications.length} {notifications.length === 1 ? 'notificação visualizada' : 'notificações visualizadas'}
                 </>
               )}
             </p>
           </div>
           {error && (
-            <div style={{ 
-              padding: '16px', 
-              background: '#fed7d7', 
-              color: '#c53030', 
-              borderRadius: '8px',
-              marginBottom: '16px'
-            }}>
+            <div className="app__error">
               {error}
             </div>
           )}
-          <div className="app__notifications-list">
-            {loading ? (
-              <div className="app__empty-state">
-                <span className="app__empty-icon">⟳</span>
-                <p className="app__empty-text">Carregando notificações...</p>
-              </div>
-            ) : notifications.length > 0 ? (
-              notifications.map((notification) => (
+          {loading ? (
+            <div className="app__loading">
+              <p>Carregando histórico...</p>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="app__empty">
+              <p>Nenhuma notificação visualizada ainda.</p>
+            </div>
+          ) : (
+            <div className="app__notifications">
+              {notifications.map((notification) => (
                 <Notification
                   key={notification.id}
                   notification={notification}
@@ -170,19 +139,14 @@ function Dashboard() {
                   onReject={handleReject}
                   onRead={handleRead}
                 />
-              ))
-            ) : (
-              <div className="app__empty-state">
-                <span className="app__empty-icon">—</span>
-                <p className="app__empty-text">Nenhuma notificação disponível</p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
   )
 }
 
-export default Dashboard
+export default History
 

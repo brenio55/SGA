@@ -172,6 +172,16 @@ function Header() {
                   <div className="header__user-divider"></div>
                   <button
                     className="header__user-menu-item"
+                    onClick={() => {
+                      setShowUserMenu(false)
+                      navigate('/history')
+                    }}
+                  >
+                    <span className="header__user-menu-icon">📜</span>
+                    <span>Histórico</span>
+                  </button>
+                  <button
+                    className="header__user-menu-item"
                     onClick={handleLogout}
                   >
                     <span className="header__user-menu-icon">🚪</span>

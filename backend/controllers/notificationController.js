@@ -193,3 +193,13 @@ export const getNotificationViews = async (req, res) => {
   }
 };
 
+export const getViewedNotifications = async (req, res) => {
+  try {
+    const { user_id, company_id } = req.params;
+    const notifications = await Notification.findViewedByUser(user_id, company_id);
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+

@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import InitialRegister from './pages/InitialRegister'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
+import History from './pages/History'
 
 function AppRoutes() {
   const { user, isAuthenticated, isLoading } = useAuth()
@@ -43,6 +44,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/history" 
+        element={
+          <ProtectedRoute>
+            <History />
           </ProtectedRoute>
         } 
       />

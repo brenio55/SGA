@@ -111,6 +111,31 @@ class Notification {
       ORDER BY nv.viewed_at DESC
     `;
   }
+
+  static async findViewedByUser(userId, companyId) {
+    // Busca todas as notificações visualizadas pelo usuário
+    return await db.db`
+      SELECT DISTINCT 
+        n.*, 
+        d.name as department_name,
+        nr.response_type as user_response,
+        nv.viewed_at,
+        nr.responded_at
+      FROM notifications n
+      LEFT JOIN departments d ON n.department_id = d.id
+      INNER JOIN notification_targets nt ON n.id = nt.notification_id
+      LEFT JOIN users u ON (
+        (nt.target_type = 'user' AND nt.target_id = u.id) OR
+        (nt.target_type = 'department' AND nt.target_id = u.department_id) OR
+        (nt.target_type = 'group' AND nt.target_id = u.group_id) OR
+        (nt.target_type = 'all' AND n.company_id = u.company_id)
+      )
+      INNER JOIN notification_views nv ON n.id = nv.notification_id AND nv.user_id = ${userId}
+      LEFT JOIN notification_responses nr ON n.id = nr.notification_id AND nr.user_id = ${userId}
+      WHERE u.id = ${userId} AND n.company_id = ${companyId}
+      ORDER BY nv.viewed_at DESC
+    `;
+  }
 }
 
 export default Notification;

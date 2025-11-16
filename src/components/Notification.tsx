@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Notification as NotificationClass, NotificationType, NotificationStatus } from '../classes/Notification'
 import "./Notification.css"
 
@@ -30,6 +30,13 @@ function Notification({
   const [localStatus, setLocalStatus] = useState<NotificationStatus>(
     notification?.status || mockNotification.status
   )
+
+  // Sincronizar o status quando a notificação mudar
+  useEffect(() => {
+    if (notification) {
+      setLocalStatus(notification.status)
+    }
+  }, [notification?.status])
 
   const descriptionLength = mockNotification.description?.length || 0
   const shouldShowPopup = descriptionLength > 255
