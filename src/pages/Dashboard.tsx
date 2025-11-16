@@ -86,7 +86,7 @@ function Dashboard() {
 
     try {
       await notificationsApi.view(id, user.id)
-      await loadNotifications()
+      // Não recarregar todas as notificações, apenas atualizar o estado local se necessário
     } catch (err) {
       console.error('Erro ao marcar notificação como lida:', err)
     }

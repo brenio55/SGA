@@ -233,6 +233,29 @@
   gap: 8px;
 }
 
+.admin-notifications__field-hint {
+  font-size: 12px;
+  color: #718096;
+  margin: 4px 0 8px 0;
+  font-style: italic;
+}
+
+.admin-notifications__search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.admin-notifications__search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 .admin-notifications__field label {
   font-size: 14px;
   font-weight: 500;

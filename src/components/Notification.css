@@ -253,6 +253,143 @@
   color: #991b1b;
 }
 
+.notification-card__read-more {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.notification-card__read-more:hover {
+  background: #5568d3;
+}
+
+/* Popup Styles */
+.notification-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.notification-popup {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.notification-popup__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-popup__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.notification-popup__close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.notification-popup__close:hover {
+  background: #f3f4f6;
+}
+
+.notification-popup__body {
+  padding: 20px;
+}
+
+.notification-popup__meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.notification-popup__department {
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.notification-popup__date {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.notification-popup__type {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.notification-popup__description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0 0 20px 0;
+  white-space: pre-wrap;
+}
+
+.notification-popup__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.notification-popup__status-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-top: 20px;
+}
+
+.notification-popup__status-message--success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.notification-popup__status-message--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .notification-card {

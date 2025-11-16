@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { notificationsApi, departmentsApi, groupsApi, usersApi } from '../../services/api'
+import { notificationsApi, departmentsApi, groupsApi, usersApi, companiesApi } from '../../services/api'
 import { NotificationType } from '../../classes/Notification'
-import { canCreateGroupNotifications } from '../../utils/roles'
+import { canCreateGroupNotifications, UserRole } from '../../utils/roles'
 import './AdminNotifications.css'
 
 interface Notification {
@@ -20,6 +20,7 @@ interface Notification {
 interface Department {
   id: number
   name: string
+  company_id?: number
 }
 
 interface Group {
@@ -34,6 +35,11 @@ interface User {
   email: string
 }
 
+interface Company {
+  id: number
+  name: string
+}
+
 type TargetType = 'all' | 'department' | 'group' | 'user'
 
 function AdminNotifications() {
@@ -42,9 +48,13 @@ function AdminNotifications() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [users, setUsers] = useState<User[]>([])
+  const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [companySearch, setCompanySearch] = useState('')
+  const [departmentSearch, setDepartmentSearch] = useState('')
   const [formData, setFormData] = useState({
+    company_id: user?.company_id || 0,
     department_id: '',
     title: '',
     description: '',
@@ -62,6 +72,13 @@ function AdminNotifications() {
   }, [])
 
   useEffect(() => {
+    // Carregar departamentos quando a empresa mudar (para super_admin)
+    if (formData.company_id && user?.role === UserRole.SUPER_ADMIN) {
+      loadDepartmentsForCompany(formData.company_id)
+    }
+  }, [formData.company_id])
+
+  useEffect(() => {
     if (formData.target_type === 'group' && formData.selected_departments.length > 0) {
       loadGroupsForDepartments(formData.selected_departments)
     } else {
@@ -69,18 +86,30 @@ function AdminNotifications() {
     }
   }, [formData.target_type, formData.selected_departments])
 
+  const loadDepartmentsForCompany = async (companyId: number) => {
+    try {
+      const departmentsData = await departmentsApi.getAll(companyId)
+      setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
+    } catch (err) {
+      console.error('Erro ao carregar departamentos:', err)
+    }
+  }
+
   const loadData = async () => {
     try {
       setLoading(true)
-      const [notificationsData, departmentsData, usersData] = await Promise.all([
-        notificationsApi.getAll(user?.company_id),
-        departmentsApi.getAll(user?.company_id),
-        usersApi.getAll(user?.company_id),
+      const companyId = user?.role === UserRole.SUPER_ADMIN ? undefined : user?.company_id
+      const [notificationsData, departmentsData, usersData, companiesData] = await Promise.all([
+        notificationsApi.getAll(companyId),
+        departmentsApi.getAll(companyId),
+        usersApi.getAll(companyId),
+        user?.role === UserRole.SUPER_ADMIN ? companiesApi.getAll() : Promise.resolve([]),
       ])
 
       setNotifications(Array.isArray(notificationsData) ? notificationsData : [])
       setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
       setUsers(Array.isArray(usersData) ? usersData : [])
+      setCompanies(Array.isArray(companiesData) ? companiesData : [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
     } finally {
@@ -155,6 +184,7 @@ function AdminNotifications() {
 
   const handleOpenModal = () => {
     setFormData({
+      company_id: user?.company_id || 0,
       department_id: '',
       title: '',
       description: '',
@@ -165,6 +195,8 @@ function AdminNotifications() {
       selected_groups: [],
       selected_users: [],
     })
+    setCompanySearch('')
+    setDepartmentSearch('')
     setShowModal(true)
     setError(null)
   }
@@ -183,44 +215,55 @@ function AdminNotifications() {
       return
     }
 
-    // Validar targets baseado no tipo
-    if (formData.target_type === 'department' && formData.selected_departments.length === 0) {
-      setError('Selecione pelo menos um departamento')
+    // Validar empresa para super_admin
+    if (user?.role === UserRole.SUPER_ADMIN && !formData.company_id) {
+      setError('Selecione uma empresa')
       return
     }
 
-    if (formData.target_type === 'group' && formData.selected_groups.length === 0) {
-      setError('Selecione pelo menos um grupo')
-      return
-    }
+    // Validar targets baseado no tipo (apenas se tiver departamento selecionado)
+    if (formData.department_id) {
+      if (formData.target_type === 'department' && formData.selected_departments.length === 0) {
+        setError('Selecione pelo menos um departamento')
+        return
+      }
 
-    if (formData.target_type === 'user' && formData.selected_users.length === 0) {
-      setError('Selecione pelo menos um usuário')
-      return
+      if (formData.target_type === 'group' && formData.selected_groups.length === 0) {
+        setError('Selecione pelo menos um grupo')
+        return
+      }
+
+      if (formData.target_type === 'user' && formData.selected_users.length === 0) {
+        setError('Selecione pelo menos um usuário')
+        return
+      }
     }
 
     try {
+      // Se não tiver departamento selecionado, a notificação deve ser para todos
+      const finalTargetType = !formData.department_id ? 'all' : formData.target_type
+      
       // Construir array de targets
       const targets: Array<{ target_type: string; target_id?: number }> = []
 
-      if (formData.target_type === 'all') {
+      if (finalTargetType === 'all') {
         targets.push({ target_type: 'all' })
-      } else if (formData.target_type === 'department') {
+      } else if (finalTargetType === 'department') {
         formData.selected_departments.forEach(deptId => {
           targets.push({ target_type: 'department', target_id: deptId })
         })
-      } else if (formData.target_type === 'group') {
+      } else if (finalTargetType === 'group') {
         formData.selected_groups.forEach(groupId => {
           targets.push({ target_type: 'group', target_id: groupId })
         })
-      } else if (formData.target_type === 'user') {
+      } else if (finalTargetType === 'user') {
         formData.selected_users.forEach(userId => {
           targets.push({ target_type: 'user', target_id: userId })
         })
       }
 
       await notificationsApi.create({
-        company_id: user!.company_id,
+        company_id: formData.company_id || user!.company_id,
         department_id: formData.department_id ? Number(formData.department_id) : undefined,
         title: formData.title,
         description: formData.description,
@@ -321,19 +364,84 @@ function AdminNotifications() {
               </button>
             </div>
             <form className="admin-notifications__form" onSubmit={handleSubmit}>
+              {user?.role === UserRole.SUPER_ADMIN && (
+                <div className="admin-notifications__field">
+                  <label htmlFor="company_id">Empresa *</label>
+                  <input
+                    type="text"
+                    placeholder="Buscar empresa por ID ou nome..."
+                    value={companySearch}
+                    onChange={(e) => setCompanySearch(e.target.value)}
+                    className="admin-notifications__search-input"
+                  />
+                  <select
+                    id="company_id"
+                    value={formData.company_id}
+                    onChange={(e) => {
+                      const companyId = Number(e.target.value)
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        company_id: companyId,
+                        department_id: '', // Reset department when company changes
+                      }))
+                      setCompanySearch('')
+                    }}
+                    required
+                  >
+                    <option value="">Selecione uma empresa</option>
+                    {companies
+                      .filter(company => 
+                        !companySearch || 
+                        company.id.toString().includes(companySearch) ||
+                        company.name.toLowerCase().includes(companySearch.toLowerCase())
+                      )
+                      .map((company) => (
+                        <option key={company.id} value={company.id}>
+                          ID: {company.id} - {company.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
               <div className="admin-notifications__field">
                 <label htmlFor="department_id">Departamento (Opcional)</label>
+                <p className="admin-notifications__field-hint">
+                  Se não selecionar um departamento, a notificação será enviada a todos os usuários da empresa.
+                </p>
+                <input
+                  type="text"
+                  placeholder="Buscar departamento por ID ou nome..."
+                  value={departmentSearch}
+                  onChange={(e) => setDepartmentSearch(e.target.value)}
+                  className="admin-notifications__search-input"
+                />
                 <select
                   id="department_id"
                   value={formData.department_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, department_id: e.target.value }))}
+                  onChange={(e) => {
+                    const deptId = e.target.value
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      department_id: deptId,
+                      // Se remover o departamento, voltar para 'all' apenas se estava usando departamento/grupo
+                      target_type: !deptId && (prev.target_type === 'department' || prev.target_type === 'group') ? 'all' : prev.target_type
+                    }))
+                    setDepartmentSearch('')
+                  }}
                 >
-                  <option value="">Nenhum</option>
-                  {departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
+                  <option value="">Nenhum (Todos os usuários)</option>
+                  {departments
+                    .filter(dept => 
+                      (!formData.company_id || dept.company_id === formData.company_id) &&
+                      (!departmentSearch || 
+                        dept.id.toString().includes(departmentSearch) ||
+                        dept.name.toLowerCase().includes(departmentSearch.toLowerCase()))
+                    )
+                    .map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        ID: {dept.id} - {dept.name}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div className="admin-notifications__field">
@@ -401,6 +509,7 @@ function AdminNotifications() {
                       value="department"
                       checked={formData.target_type === 'department'}
                       onChange={() => handleTargetTypeChange('department')}
+                      disabled={!formData.department_id}
                     />
                     Departamentos específicos
                   </label>
@@ -412,6 +521,7 @@ function AdminNotifications() {
                         value="group"
                         checked={formData.target_type === 'group'}
                         onChange={() => handleTargetTypeChange('group')}
+                        disabled={!formData.department_id}
                       />
                       Grupos específicos
                     </label>
@@ -427,6 +537,11 @@ function AdminNotifications() {
                     Usuários específicos
                   </label>
                 </div>
+                {!formData.department_id && (
+                  <p className="admin-notifications__field-hint">
+                    Selecione um departamento para usar opções de departamentos ou grupos específicos.
+                  </p>
+                )}
               </div>
 
               {formData.target_type === 'department' && (

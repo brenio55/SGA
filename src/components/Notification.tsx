@@ -25,32 +25,56 @@ function Notification({
   )
 
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showPopup, setShowPopup] = useState(false)
   const [localStatus, setLocalStatus] = useState<NotificationStatus>(mockNotification.status)
 
-  const handleAccept = () => {
+  const descriptionLength = mockNotification.description?.length || 0
+  const shouldShowPopup = descriptionLength > 255
+
+  const handleAccept = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation()
+    }
     if (onAccept) {
       onAccept(mockNotification.id)
     }
     setLocalStatus(NotificationStatus.ACCEPTED)
   }
 
-  const handleReject = () => {
+  const handleReject = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation()
+    }
     if (onReject) {
       onReject(mockNotification.id)
     }
     setLocalStatus(NotificationStatus.REJECTED)
   }
 
-  const handleClick = () => {
-    if (!isExpanded) {
-      setIsExpanded(true)
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (shouldShowPopup) {
+      setShowPopup(true)
       if (localStatus === NotificationStatus.PENDING && onRead) {
         onRead(mockNotification.id)
         setLocalStatus(NotificationStatus.READ)
       }
     } else {
-      setIsExpanded(false)
+      if (!isExpanded) {
+        setIsExpanded(true)
+        if (localStatus === NotificationStatus.PENDING && onRead) {
+          onRead(mockNotification.id)
+          setLocalStatus(NotificationStatus.READ)
+        }
+      } else {
+        setIsExpanded(false)
+      }
     }
+  }
+
+  const handleClosePopup = () => {
+    setShowPopup(false)
   }
 
   const getTypeClass = () => {
@@ -80,79 +104,147 @@ function Notification({
   }
 
   return (
-    <div 
-      className={`notification-card ${getStatusClass()} ${isExpanded ? 'notification-card--expanded' : ''}`}
-      onClick={handleClick}
-    >
-      <div className="notification-card__header">
-        <div className="notification-card__left">
-          <div className="notification-card__title-section">
-            <h4 className="notification-card__title">{mockNotification.title}</h4>
-            <span className="notification-card__id">ID: {mockNotification.id || 'N/A'}</span>
-            {localStatus === NotificationStatus.PENDING && (
-              <span className="notification-badge notification-badge--new">Nova</span>
+    <>
+      <div 
+        className={`notification-card ${getStatusClass()} ${isExpanded ? 'notification-card--expanded' : ''}`}
+        onClick={handleClick}
+      >
+        <div className="notification-card__header">
+          <div className="notification-card__left">
+            <div className="notification-card__title-section">
+              <h4 className="notification-card__title">{mockNotification.title}</h4>
+              <span className="notification-card__id">ID: {mockNotification.id || 'N/A'}</span>
+              {localStatus === NotificationStatus.PENDING && (
+                <span className="notification-badge notification-badge--new">Nova</span>
+              )}
+            </div>
+            <p className="notification-card__department">
+              {mockNotification.department}
+            </p>
+          </div>
+          <div className="notification-card__right">
+            <div className="notification-card__time">
+              {mockNotification.formatTime()}
+            </div>
+            <span className={`notification-card__type ${getTypeClass()}`}>
+              {mockNotification.type === NotificationType.URGENT ? 'Urgente' :
+               mockNotification.type === NotificationType.IMPORTANT ? 'Importante' :
+               mockNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
+            </span>
+          </div>
+        </div>
+
+        {isExpanded && !shouldShowPopup && (
+          <div className="notification-card__body">
+            <p className="notification-card__description">{mockNotification.description}</p>
+            <div className="notification-card__date">
+              {mockNotification.formatDate()}
+            </div>
+            
+            {mockNotification.requiresAcceptance && localStatus === NotificationStatus.PENDING && (
+              <div className="notification-card__actions">
+                <button 
+                  className="notification-button notification-button--accept"
+                  onClick={handleAccept}
+                >
+                  ✓ Aceitar
+                </button>
+                <button 
+                  className="notification-button notification-button--reject"
+                  onClick={handleReject}
+                >
+                  ✕ Rejeitar
+                </button>
+              </div>
+            )}
+
+            {localStatus === NotificationStatus.ACCEPTED && (
+              <div className="notification-card__status-message notification-card__status-message--success">
+                ✓ Notificação aceita
+              </div>
+            )}
+
+            {localStatus === NotificationStatus.REJECTED && (
+              <div className="notification-card__status-message notification-card__status-message--rejected">
+                ✕ Notificação rejeitada
+              </div>
             )}
           </div>
-          <p className="notification-card__department">
-            {mockNotification.department}
-          </p>
-        </div>
-        <div className="notification-card__right">
-          <div className="notification-card__time">
-            {mockNotification.formatTime()}
+        )}
+
+        {isExpanded && shouldShowPopup && (
+          <div className="notification-card__body">
+            <p className="notification-card__description">
+              {mockNotification.description.substring(0, 255)}...
+            </p>
+            <div className="notification-card__date">
+              {mockNotification.formatDate()}
+            </div>
+            <button 
+              className="notification-card__read-more"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowPopup(true)
+              }}
+            >
+              Ler mais
+            </button>
           </div>
-          <span className={`notification-card__type ${getTypeClass()}`}>
-            {mockNotification.type === NotificationType.URGENT ? 'Urgente' :
-             mockNotification.type === NotificationType.IMPORTANT ? 'Importante' :
-             mockNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
-          </span>
-        </div>
+        )}
       </div>
 
-      {isExpanded && (
-        <div className="notification-card__body">
-          <p className="notification-card__description">{mockNotification.description}</p>
-          <div className="notification-card__date">
-            {mockNotification.formatDate()}
+      {showPopup && (
+        <div className="notification-popup-overlay" onClick={handleClosePopup}>
+          <div className="notification-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="notification-popup__header">
+              <h3 className="notification-popup__title">{mockNotification.title}</h3>
+              <button className="notification-popup__close" onClick={handleClosePopup}>×</button>
+            </div>
+            <div className="notification-popup__body">
+              <div className="notification-popup__meta">
+                <span className="notification-popup__department">{mockNotification.department}</span>
+                <span className="notification-popup__date">{mockNotification.formatDate()}</span>
+                <span className={`notification-popup__type ${getTypeClass()}`}>
+                  {mockNotification.type === NotificationType.URGENT ? 'Urgente' :
+                   mockNotification.type === NotificationType.IMPORTANT ? 'Importante' :
+                   mockNotification.type === NotificationType.INFO ? 'Informativa' : 'Normal'}
+                </span>
+              </div>
+              <p className="notification-popup__description">{mockNotification.description}</p>
+              
+              {mockNotification.requiresAcceptance && localStatus === NotificationStatus.PENDING && (
+                <div className="notification-popup__actions">
+                  <button 
+                    className="notification-button notification-button--accept"
+                    onClick={handleAccept}
+                  >
+                    ✓ Aceitar
+                  </button>
+                  <button 
+                    className="notification-button notification-button--reject"
+                    onClick={handleReject}
+                  >
+                    ✕ Rejeitar
+                  </button>
+                </div>
+              )}
+
+              {localStatus === NotificationStatus.ACCEPTED && (
+                <div className="notification-popup__status-message notification-popup__status-message--success">
+                  ✓ Notificação aceita
+                </div>
+              )}
+
+              {localStatus === NotificationStatus.REJECTED && (
+                <div className="notification-popup__status-message notification-popup__status-message--rejected">
+                  ✕ Notificação rejeitada
+                </div>
+              )}
+            </div>
           </div>
-          
-          {mockNotification.requiresAcceptance && localStatus === NotificationStatus.PENDING && (
-            <div className="notification-card__actions">
-              <button 
-                className="notification-button notification-button--accept"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleAccept()
-                }}
-              >
-                ✓ Aceitar
-              </button>
-              <button 
-                className="notification-button notification-button--reject"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleReject()
-                }}
-              >
-                ✕ Rejeitar
-              </button>
-            </div>
-          )}
-
-          {localStatus === NotificationStatus.ACCEPTED && (
-            <div className="notification-card__status-message notification-card__status-message--success">
-              ✓ Notificação aceita
-            </div>
-          )}
-
-          {localStatus === NotificationStatus.REJECTED && (
-            <div className="notification-card__status-message notification-card__status-message--rejected">
-              ✕ Notificação rejeitada
-            </div>
-          )}
         </div>
       )}
-    </div>
+    </>
   )
 }
 
