@@ -67,25 +67,24 @@ function Notification({
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     
-          if (shouldShowPopup) {
-            setShowPopup(true)
-            // Só marcar como lida se não requer aceitação ou se já foi respondida
-            if (localStatus === NotificationStatus.PENDING && onRead && !currentNotification.requiresAcceptance) {
-              onRead(currentNotification.id)
-              setLocalStatus(NotificationStatus.READ)
-            }
-          } else {
-            if (!isExpanded) {
-              setIsExpanded(true)
-              // Só marcar como lida se não requer aceitação ou se já foi respondida
-              if (localStatus === NotificationStatus.PENDING && onRead && !currentNotification.requiresAcceptance) {
-                onRead(currentNotification.id)
-                setLocalStatus(NotificationStatus.READ)
-              }
-            } else {
-              setIsExpanded(false)
-            }
-          }
+    // Sempre marcar como visualizada quando clicada/aberta
+    if (localStatus === NotificationStatus.PENDING && onRead && currentNotification.id) {
+      onRead(currentNotification.id)
+      // Atualizar status local apenas se não requer aceitação
+      if (!currentNotification.requiresAcceptance) {
+        setLocalStatus(NotificationStatus.READ)
+      }
+    }
+    
+    if (shouldShowPopup) {
+      setShowPopup(true)
+    } else {
+      if (!isExpanded) {
+        setIsExpanded(true)
+      } else {
+        setIsExpanded(false)
+      }
+    }
   }
 
   const handleClosePopup = () => {
@@ -200,6 +199,13 @@ function Notification({
               className="notification-card__read-more"
               onClick={(e) => {
                 e.stopPropagation()
+                // Marcar como visualizada ao clicar em "Ler mais"
+                if (localStatus === NotificationStatus.PENDING && onRead && currentNotification.id) {
+                  onRead(currentNotification.id)
+                  if (!currentNotification.requiresAcceptance) {
+                    setLocalStatus(NotificationStatus.READ)
+                  }
+                }
                 setShowPopup(true)
               }}
             >

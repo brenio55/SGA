@@ -31,8 +31,10 @@ class Notification {
 
   static async findForUser(userId, companyId) {
     // Busca notificações que o usuário deve receber baseado nos targets
-    // EXCLUI notificações já visualizadas, aceitas ou rejeitadas (essas vão apenas para o histórico)
-    // Inclui informação sobre se o usuário já respondeu (aceitou/rejeitou)
+    // Lógica:
+    // - Notificações SEM aceite: quando visualizadas, vão para o histórico (excluídas daqui)
+    // - Notificações COM aceite: mesmo visualizadas, permanecem até serem aceitas/rejeitadas
+    // - Notificações respondidas (aceitas/rejeitadas) sempre vão para o histórico
     return await db.db`
       SELECT DISTINCT 
         n.*, 
@@ -56,7 +58,13 @@ class Notification {
       WHERE u.id = ${userId} 
         AND n.company_id = ${companyId}
         AND nr.id IS NULL  -- Excluir notificações já respondidas (aceitas ou rejeitadas)
-        AND nv.id IS NULL  -- Excluir notificações já visualizadas
+        AND (
+          -- Se requer aceitação, manter mesmo se visualizada
+          (n.requires_acceptance = true)
+          OR
+          -- Se não requer aceitação, excluir se já foi visualizada
+          (n.requires_acceptance = false AND nv.id IS NULL)
+        )
       ORDER BY n.created_at DESC
     `;
   }
@@ -117,8 +125,9 @@ class Notification {
   }
 
   static async findViewedByUser(userId, companyId) {
-    // Busca todas as notificações visualizadas, aceitas ou rejeitadas pelo usuário
-    // Usa UNION para pegar notificações que foram visualizadas OU respondidas
+    // Busca todas as notificações que devem aparecer no histórico:
+    // 1. Notificações visualizadas SEM aceite (vão para histórico após visualização)
+    // 2. Notificações respondidas (aceitas ou rejeitadas) - sempre vão para histórico
     return await db.db`
       SELECT DISTINCT 
         n.*, 
@@ -139,8 +148,14 @@ class Notification {
       LEFT JOIN notification_responses nr ON n.id = nr.notification_id AND nr.user_id = ${userId}
       WHERE u.id = ${userId} 
         AND n.company_id = ${companyId}
-        AND (nv.id IS NOT NULL OR nr.id IS NOT NULL)  -- Visualizada OU respondida
-      ORDER BY COALESCE(nv.viewed_at, nr.responded_at) DESC
+        AND (
+          -- Notificações respondidas (aceitas ou rejeitadas) sempre vão para histórico
+          nr.id IS NOT NULL
+          OR
+          -- Notificações visualizadas SEM aceite também vão para histórico
+          (nv.id IS NOT NULL AND n.requires_acceptance = false)
+        )
+      ORDER BY COALESCE(nr.responded_at, nv.viewed_at) DESC
     `;
   }
 

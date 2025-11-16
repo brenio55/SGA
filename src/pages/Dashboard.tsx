@@ -120,7 +120,10 @@ function Dashboard() {
 
     try {
       await notificationsApi.view(id, user.id)
-      // Não recarregar todas as notificações, apenas atualizar o estado local se necessário
+      // Recarregar notificações para atualizar a lista
+      // Notificações sem aceite serão removidas da lista (vão para histórico)
+      // Notificações com aceite permanecerão na lista
+      await loadNotifications()
     } catch (err) {
       console.error('Erro ao marcar notificação como lida:', err)
     }
