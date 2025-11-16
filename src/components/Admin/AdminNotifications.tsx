@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { notificationsApi, departmentsApi, groupsApi, usersApi, companiesApi } from '../../services/api'
 import { NotificationType } from '../../classes/Notification'
-import { canCreateGroupNotifications, UserRole } from '../../utils/roles'
+import { canCreateGroupNotifications, UserRole, hasPermission } from '../../utils/roles'
+import NotificationDetails from './NotificationDetails'
 import './AdminNotifications.css'
 
 interface Notification {
@@ -52,6 +53,7 @@ function AdminNotifications() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null)
   const [companySearch, setCompanySearch] = useState('')
   const [departmentSearch, setDepartmentSearch] = useState('')
   const [formData, setFormData] = useState({
@@ -365,6 +367,15 @@ function AdminNotifications() {
                 </div>
               </div>
               <div className="admin-notifications__card-actions">
+                {(hasPermission(user?.role || '', UserRole.MANAGER) || user?.role === UserRole.SUPER_ADMIN) && (
+                  <button
+                    className="admin-notifications__details-button"
+                    onClick={() => setSelectedNotificationId(notification.id)}
+                    title="Ver detalhes da notificação"
+                  >
+                    📊 Detalhes
+                  </button>
+                )}
                 <button
                   className="admin-notifications__delete-button"
                   onClick={() => handleDelete(notification.id)}
@@ -681,6 +692,13 @@ function AdminNotifications() {
             </form>
           </div>
         </div>
+      )}
+
+      {selectedNotificationId && (
+        <NotificationDetails
+          notificationId={selectedNotificationId}
+          onClose={() => setSelectedNotificationId(null)}
+        />
       )}
     </div>
   )

@@ -203,6 +203,16 @@ export const getNotificationViews = async (req, res) => {
   }
 };
 
+export const getNotificationResponses = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const responses = await NotificationResponse.findByNotification(id);
+    res.json(responses);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getViewedNotifications = async (req, res) => {
   try {
     const { user_id, company_id } = req.params;

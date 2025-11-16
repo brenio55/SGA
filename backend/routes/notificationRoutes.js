@@ -14,6 +14,7 @@ router.post('/', notificationController.createNotification);
 router.post('/:id/view', notificationController.viewNotification);
 router.post('/:id/respond', notificationController.respondToNotification);
 router.get('/:id/views', notificationController.getNotificationViews);
+router.get('/:id/responses', notificationController.getNotificationResponses);
 
 // Rotas genéricas com :id devem vir por último
 router.get('/:id', notificationController.getNotificationById);
