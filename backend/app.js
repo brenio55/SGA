@@ -6,6 +6,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 import db from './db.js';
 
+// Import routes
+import notificationRoutes from './routes/notificationRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import companyRoutes from './routes/companyRoutes.js';
+import departmentRoutes from './routes/departmentRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
 
 const app = express();
 const port = 3001;
@@ -24,16 +30,21 @@ function testDbConnection() {
   );
 }
 
-app.post('/notification', (req, res) => {
-  res.send('Hello from the backend!');
-});
+// Routes
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/companies', companyRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/groups', groupRoutes);
 
-app.get('/notification', (req, res) => {
-  res.send('Hello from the backend!');
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Backend is running' });
 });
 
 testDbConnection();
 
 app.listen(port, () => {
   console.log(`Backend server running at http://localhost:${port}`);
+  console.log(`API endpoints available at http://localhost:${port}/api`);
 });
