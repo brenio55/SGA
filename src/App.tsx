@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { UserRole } from './utils/roles'
 
 // Pages
+import Login from './pages/Login'
 import InitialRegister from './pages/InitialRegister'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
@@ -24,13 +25,13 @@ function AppRoutes() {
     )
   }
 
-  // Se não há usuários cadastrados, mostrar tela de cadastro inicial
-  // Por enquanto, verificar se não está autenticado
+  // Se não está autenticado, mostrar tela de login ou registro
   if (!isAuthenticated) {
     return (
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<InitialRegister />} />
-        <Route path="*" element={<Navigate to="/register" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     )
   }

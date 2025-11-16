@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { UserRole } from '../utils/roles'
 import './InitialRegister.css'
@@ -270,6 +271,15 @@ function InitialRegister() {
             {isLoading ? 'Criando conta...' : 'Criar Conta'}
           </button>
         </form>
+
+        <div className="initial-register__footer">
+          <p className="initial-register__footer-text">
+            Já tem uma conta?{' '}
+            <Link to="/login" className="initial-register__link">
+              Faça login aqui
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )

@@ -85,7 +85,7 @@ function Header() {
 
   const handleLogout = () => {
     logout()
-    navigate('/register')
+    navigate('/login')
   }
 
   const showAdminButton = user && isAdmin(user.role)
@@ -114,15 +114,15 @@ function Header() {
           ) : (
             <div className="header__logo">
               <span className="header__logo-icon">
-                {company?.name ? company.name.charAt(0).toUpperCase() : 'D'}
+                {company?.name ? company.name.charAt(0).toUpperCase() : 'S'}
               </span>
             </div>
           )}
           <div className="header__brand-text">
             <h1 className="header__title">
-              {loadingCompany ? 'Carregando...' : (company?.name || 'DiVSeC')}
+              {loadingCompany ? 'Carregando...' : (company?.name || 'SGA-BMS')}
             </h1>
-            <p className="header__subtitle">Cloud Technology</p>
+            <p className="header__subtitle">Sistema de Gestão e Avisos</p>
           </div>
         </div>
         

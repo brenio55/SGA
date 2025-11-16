@@ -34,7 +34,11 @@ class User {
 
   static async findByEmail(email) {
     const result = await db.db`
-      SELECT * FROM users WHERE email = ${email}
+      SELECT u.*, d.name as department_name, g.name as group_name
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN groups g ON u.group_id = g.id
+      WHERE u.email = ${email}
     `;
     return result[0] || null;
   }

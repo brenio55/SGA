@@ -162,6 +162,29 @@
   cursor: not-allowed;
 }
 
+.initial-register__footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.initial-register__footer-text {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+.initial-register__link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.initial-register__link:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
 @media (max-width: 640px) {
   .initial-register__container {
     padding: 24px;

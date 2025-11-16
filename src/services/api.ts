@@ -20,12 +20,45 @@ async function request<T>(
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
     
+    // Verificar se a resposta é JSON
+    const contentType = response.headers.get('content-type')
+    const isJson = contentType && contentType.includes('application/json')
+    
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Erro na requisição' }))
-      throw new Error(error.error || `Erro ${response.status}`)
+      let errorMessage = `Erro ${response.status}: ${response.statusText}`
+      
+      if (isJson) {
+        try {
+          const error = await response.json()
+          errorMessage = error.error || errorMessage
+        } catch (parseError) {
+          // Se não conseguir fazer parse, usar mensagem padrão
+          console.error('Erro ao fazer parse do JSON de erro:', parseError)
+        }
+      } else {
+        // Se não for JSON, tentar ler como texto
+        try {
+          const text = await response.text()
+          errorMessage = text || errorMessage
+        } catch {
+          // Se não conseguir ler como texto, usar mensagem padrão
+        }
+      }
+      
+      throw new Error(errorMessage)
     }
 
-    return await response.json()
+    // Se chegou aqui, a resposta foi OK
+    if (!isJson) {
+      throw new Error('Resposta do servidor não é JSON válido')
+    }
+
+    try {
+      return await response.json()
+    } catch (parseError) {
+      console.error('Erro ao fazer parse do JSON da resposta:', parseError)
+      throw new Error('Resposta do servidor não é JSON válido')
+    }
   } catch (error) {
     if (error instanceof Error) {
       throw error

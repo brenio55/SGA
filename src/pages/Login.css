@@ -1,0 +1,143 @@
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px;
+}
+
+.login__container {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 40px;
+}
+
+.login__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login__title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  letter-spacing: -1px;
+}
+
+.login__subtitle {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login__field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.login__field input {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.login__field input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.login__field input::placeholder {
+  color: #a0aec0;
+}
+
+.login__error {
+  padding: 12px 16px;
+  background: #fed7d7;
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  color: #c53030;
+  font-size: 14px;
+  text-align: center;
+}
+
+.login__submit {
+  padding: 14px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.login__submit:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.login__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login__footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.login__footer-text {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+.login__link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.login__link:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login__container {
+    padding: 32px 24px;
+  }
+
+  .login__title {
+    font-size: 28px;
+  }
+}
+

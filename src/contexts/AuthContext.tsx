@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (companyId: number, email: string, password: string) => Promise<void>
   logout: () => void
   register: (userData: RegisterData) => Promise<void>
   updateUser: (userData: Partial<User>) => void
@@ -47,7 +47,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedToken = localStorage.getItem('token')
         
         if (storedUser && storedToken) {
-          setUser(JSON.parse(storedUser))
+          try {
+            const parsedUser = JSON.parse(storedUser)
+            // Validar se o objeto parseado tem a estrutura esperada
+            if (parsedUser && typeof parsedUser === 'object' && parsedUser.id && parsedUser.email) {
+              setUser(parsedUser)
+            } else {
+              // Se o formato estiver incorreto, limpar
+              console.warn('Formato de usuário inválido no localStorage')
+              localStorage.removeItem('user')
+              localStorage.removeItem('token')
+            }
+          } catch (parseError) {
+            console.error('Erro ao fazer parse do usuário do localStorage:', parseError)
+            localStorage.removeItem('user')
+            localStorage.removeItem('token')
+          }
         }
       } catch (error) {
         console.error('Erro ao carregar usuário:', error)
@@ -61,37 +76,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadUser()
   }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = async (companyId: number, email: string, password: string) => {
     try {
-      // TODO: Implementar chamada real à API quando backend tiver endpoint de login
-      // Por enquanto, mock para desenvolvimento
-      const response = await fetch('http://localhost:3001/api/users', {
-        method: 'GET',
+      const response = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          company_id: companyId,
+          email,
+          password,
+        }),
       })
-      
-      const users = await response.json()
-      const foundUser = users.find((u: any) => u.email === email)
-      
-      if (!foundUser) {
-        throw new Error('Usuário não encontrado')
+
+      // Verificar se a resposta é JSON
+      const contentType = response.headers.get('content-type')
+      const isJson = contentType && contentType.includes('application/json')
+
+      if (!response.ok) {
+        let errorMessage = 'Erro ao fazer login'
+        
+        if (isJson) {
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } catch (parseError) {
+            // Se não conseguir fazer parse do JSON, usar mensagem padrão
+            errorMessage = `Erro ${response.status}: ${response.statusText}`
+          }
+        } else {
+          // Se não for JSON, tentar ler como texto
+          try {
+            const text = await response.text()
+            errorMessage = text || errorMessage
+          } catch {
+            errorMessage = `Erro ${response.status}: ${response.statusText}`
+          }
+        }
+        
+        throw new Error(errorMessage)
       }
 
-      // Em produção, o backend deve verificar a senha
-      // Por enquanto, apenas salvar o usuário
+      // Se chegou aqui, a resposta foi OK
+      if (!isJson) {
+        throw new Error('Resposta do servidor não é JSON válido')
+      }
+
+      const data = await response.json()
+      
+      if (!data.user) {
+        throw new Error('Dados do usuário não encontrados na resposta')
+      }
+
       const userData: User = {
-        id: foundUser.id,
-        company_id: foundUser.company_id,
-        department_id: foundUser.department_id,
-        group_id: foundUser.group_id,
-        full_name: foundUser.full_name,
-        role: foundUser.role,
-        email: foundUser.email,
-        image_base64: foundUser.image_base64,
+        id: data.user.id,
+        company_id: data.user.company_id,
+        department_id: data.user.department_id,
+        group_id: data.user.group_id,
+        full_name: data.user.full_name,
+        role: data.user.role,
+        email: data.user.email,
+        image_base64: data.user.image_base64,
       }
 
       setUser(userData)
       localStorage.setItem('user', JSON.stringify(userData))
-      localStorage.setItem('token', 'mock-token') // TODO: usar token real
+      localStorage.setItem('token', data.token || 'mock-token')
     } catch (error) {
       if (error instanceof Error) {
         throw error

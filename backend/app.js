@@ -10,6 +10,7 @@ import db from './db.js';
 import requestLogger from './middleware/requestLogger.js';
 
 // Import routes
+import authRoutes from './routes/authRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
@@ -43,6 +44,7 @@ function testDbConnection() {
 }
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/companies', companyRoutes);
@@ -52,6 +54,19 @@ app.use('/api/groups', groupRoutes);
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend is running' });
+});
+
+// Error handling middleware - deve vir depois de todas as rotas
+app.use((err, req, res, next) => {
+  console.error('Erro não tratado:', err);
+  res.status(err.status || 500).json({
+    error: err.message || 'Erro interno do servidor'
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Rota não encontrada' });
 });
 
 testDbConnection();
