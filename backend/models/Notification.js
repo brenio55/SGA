@@ -49,9 +49,11 @@ class Notification {
 
   static async create(data) {
     const { company_id, department_id, title, description, type, requires_acceptance } = data;
+    // Converter undefined para null para campos opcionais
+    const deptId = department_id !== undefined ? department_id : null;
     const result = await db.db`
       INSERT INTO notifications (company_id, department_id, title, description, type, requires_acceptance)
-      VALUES (${company_id}, ${department_id}, ${title}, ${description}, ${type}, ${requires_acceptance})
+      VALUES (${company_id}, ${deptId}, ${title}, ${description}, ${type}, ${requires_acceptance})
       RETURNING *
     `;
     return result[0];
