@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Header from '../Header'
 import ProfileLeft from '../ProfileLeft'
 import Notification from '../components/Notification'
-import { Notification as NotificationClass, NotificationType } from '../classes/Notification'
+import { Notification as NotificationClass, NotificationType, NotificationStatus } from '../classes/Notification'
 import { useAuth } from '../contexts/AuthContext'
 import { notificationsApi } from '../services/api'
 import './Dashboard.css'
@@ -15,6 +15,8 @@ interface NotificationData {
   requires_acceptance: boolean
   department_name?: string
   created_at: string
+  user_response?: 'accepted' | 'rejected' | null
+  view_status?: 'read' | 'pending'
 }
 
 function Dashboard() {
@@ -40,14 +42,26 @@ function Dashboard() {
       const notificationsList = Array.isArray(data) ? data : []
 
       const mappedNotifications = notificationsList.map((notif: NotificationData) => {
-        return new NotificationClass(
+        // Determinar o status baseado na resposta do usuário e visualização
+        let status = NotificationStatus.PENDING
+        if (notif.user_response === 'accepted') {
+          status = NotificationStatus.ACCEPTED
+        } else if (notif.user_response === 'rejected') {
+          status = NotificationStatus.REJECTED
+        } else if (notif.view_status === 'read') {
+          status = NotificationStatus.READ
+        }
+
+        const notification = new NotificationClass(
           notif.title,
           notif.description,
           notif.department_name || 'Geral',
           notif.type as NotificationType,
           notif.requires_acceptance,
-          notif.id
+          notif.id,
+          status
         )
+        return notification
       })
 
       setNotifications(mappedNotifications)

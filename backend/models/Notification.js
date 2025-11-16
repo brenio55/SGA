@@ -31,8 +31,16 @@ class Notification {
 
   static async findForUser(userId, companyId) {
     // Busca notificações que o usuário deve receber baseado nos targets
+    // Inclui informação sobre se o usuário já respondeu (aceitou/rejeitou)
     return await db.db`
-      SELECT DISTINCT n.*, d.name as department_name
+      SELECT DISTINCT 
+        n.*, 
+        d.name as department_name,
+        nr.response_type as user_response,
+        CASE 
+          WHEN nv.id IS NOT NULL THEN 'read'
+          ELSE 'pending'
+        END as view_status
       FROM notifications n
       LEFT JOIN departments d ON n.department_id = d.id
       INNER JOIN notification_targets nt ON n.id = nt.notification_id
@@ -42,6 +50,8 @@ class Notification {
         (nt.target_type = 'group' AND nt.target_id = u.group_id) OR
         (nt.target_type = 'all' AND n.company_id = u.company_id)
       )
+      LEFT JOIN notification_responses nr ON n.id = nr.notification_id AND nr.user_id = ${userId}
+      LEFT JOIN notification_views nv ON n.id = nv.notification_id AND nv.user_id = ${userId}
       WHERE u.id = ${userId} AND n.company_id = ${companyId}
       ORDER BY n.created_at DESC
     `;

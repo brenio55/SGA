@@ -26,7 +26,10 @@ function Notification({
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [showPopup, setShowPopup] = useState(false)
-  const [localStatus, setLocalStatus] = useState<NotificationStatus>(mockNotification.status)
+  // Usar o status da notificação passada como prop, ou o status padrão
+  const [localStatus, setLocalStatus] = useState<NotificationStatus>(
+    notification?.status || mockNotification.status
+  )
 
   const descriptionLength = mockNotification.description?.length || 0
   const shouldShowPopup = descriptionLength > 255
@@ -56,14 +59,16 @@ function Notification({
     
     if (shouldShowPopup) {
       setShowPopup(true)
-      if (localStatus === NotificationStatus.PENDING && onRead) {
+      // Só marcar como lida se não requer aceitação ou se já foi respondida
+      if (localStatus === NotificationStatus.PENDING && onRead && !mockNotification.requiresAcceptance) {
         onRead(mockNotification.id)
         setLocalStatus(NotificationStatus.READ)
       }
     } else {
       if (!isExpanded) {
         setIsExpanded(true)
-        if (localStatus === NotificationStatus.PENDING && onRead) {
+        // Só marcar como lida se não requer aceitação ou se já foi respondida
+        if (localStatus === NotificationStatus.PENDING && onRead && !mockNotification.requiresAcceptance) {
           onRead(mockNotification.id)
           setLocalStatus(NotificationStatus.READ)
         }
@@ -141,7 +146,8 @@ function Notification({
               {mockNotification.formatDate()}
             </div>
             
-            {mockNotification.requiresAcceptance && localStatus === NotificationStatus.PENDING && (
+            {mockNotification.requiresAcceptance && 
+             (localStatus === NotificationStatus.PENDING || localStatus === NotificationStatus.READ) && (
               <div className="notification-card__actions">
                 <button 
                   className="notification-button notification-button--accept"
@@ -212,7 +218,8 @@ function Notification({
               </div>
               <p className="notification-popup__description">{mockNotification.description}</p>
               
-              {mockNotification.requiresAcceptance && localStatus === NotificationStatus.PENDING && (
+              {mockNotification.requiresAcceptance && 
+               (localStatus === NotificationStatus.PENDING || localStatus === NotificationStatus.READ) && (
                 <div className="notification-popup__actions">
                   <button 
                     className="notification-button notification-button--accept"
