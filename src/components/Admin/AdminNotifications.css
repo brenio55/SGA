@@ -1,0 +1,359 @@
+.admin-notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-notifications__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-notifications__title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.admin-notifications__add-button {
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.admin-notifications__add-button:hover {
+  background: #5568d3;
+}
+
+.admin-notifications__error {
+  padding: 12px 16px;
+  background: #fed7d7;
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  color: #c53030;
+}
+
+.admin-notifications__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.admin-notifications__card {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-notifications__card-content {
+  flex: 1;
+}
+
+.admin-notifications__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-notifications__card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+  flex: 1;
+}
+
+.admin-notifications__type-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.admin-notifications__type-badge--normal {
+  background: #edf2f7;
+  color: #2d3748;
+}
+
+.admin-notifications__type-badge--urgent {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.admin-notifications__type-badge--important {
+  background: #feebc8;
+  color: #c05621;
+}
+
+.admin-notifications__type-badge--info {
+  background: #bee3f8;
+  color: #2c5282;
+}
+
+.admin-notifications__card-description {
+  font-size: 14px;
+  color: #4a5568;
+  margin: 0 0 12px 0;
+  line-height: 1.6;
+}
+
+.admin-notifications__card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #718096;
+}
+
+.admin-notifications__card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-notifications__delete-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #fed7d7;
+  color: #c53030;
+  transition: all 0.2s ease;
+}
+
+.admin-notifications__delete-button:hover {
+  background: #fc8181;
+  color: white;
+}
+
+.admin-notifications__empty {
+  text-align: center;
+  padding: 64px 24px;
+  color: #a0aec0;
+}
+
+.admin-notifications__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.admin-notifications__modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.admin-notifications__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-notifications__modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.admin-notifications__modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #718096;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-notifications__modal-close:hover {
+  color: #2d3748;
+}
+
+.admin-notifications__form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-notifications__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-notifications__field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.admin-notifications__field input[type="text"],
+.admin-notifications__field select,
+.admin-notifications__field textarea {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.admin-notifications__field input:focus,
+.admin-notifications__field select:focus,
+.admin-notifications__field textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.admin-notifications__target-types {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.admin-notifications__target-types label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.admin-notifications__target-types input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.admin-notifications__checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-notifications__checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.admin-notifications__checkbox-item:hover {
+  background: #edf2f7;
+}
+
+.admin-notifications__checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.admin-notifications__no-groups {
+  color: #a0aec0;
+  font-size: 14px;
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+}
+
+.admin-notifications__form-error {
+  padding: 12px 16px;
+  background: #fed7d7;
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  color: #c53030;
+  font-size: 14px;
+}
+
+.admin-notifications__form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.admin-notifications__form-actions button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-notifications__form-actions button[type="button"] {
+  background: #edf2f7;
+  color: #2d3748;
+}
+
+.admin-notifications__form-actions button[type="button"]:hover {
+  background: #e2e8f0;
+}
+
+.admin-notifications__form-actions button[type="submit"] {
+  background: #667eea;
+  color: white;
+}
+
+.admin-notifications__form-actions button[type="submit"]:hover {
+  background: #5568d3;
+}
+
+.admin-notifications__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 18px;
+  color: #718096;
+}
+

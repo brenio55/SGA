@@ -1,12 +1,521 @@
-// Placeholder - será implementado depois
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { notificationsApi, departmentsApi, groupsApi, usersApi } from '../../services/api'
+import { NotificationType } from '../../classes/Notification'
+import { canCreateGroupNotifications } from '../../utils/roles'
+import './AdminNotifications.css'
+
+interface Notification {
+  id: number
+  company_id: number
+  department_id?: number
+  title: string
+  description: string
+  type: string
+  requires_acceptance: boolean
+  created_at: string
+  department_name?: string
+}
+
+interface Department {
+  id: number
+  name: string
+}
+
+interface Group {
+  id: number
+  name: string
+  department_id: number
+}
+
+interface User {
+  id: number
+  full_name: string
+  email: string
+}
+
+type TargetType = 'all' | 'department' | 'group' | 'user'
+
 function AdminNotifications() {
+  const { user } = useAuth()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [formData, setFormData] = useState({
+    department_id: '',
+    title: '',
+    description: '',
+    type: NotificationType.NORMAL,
+    requires_acceptance: false,
+    target_type: 'all' as TargetType,
+    selected_departments: [] as number[],
+    selected_groups: [] as number[],
+    selected_users: [] as number[],
+  })
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useEffect(() => {
+    if (formData.target_type === 'group' && formData.selected_departments.length > 0) {
+      loadGroupsForDepartments(formData.selected_departments)
+    } else {
+      setGroups([])
+    }
+  }, [formData.target_type, formData.selected_departments])
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      const [notificationsData, departmentsData, usersData] = await Promise.all([
+        notificationsApi.getAll(user?.company_id),
+        departmentsApi.getAll(user?.company_id),
+        usersApi.getAll(user?.company_id),
+      ])
+
+      setNotifications(Array.isArray(notificationsData) ? notificationsData : [])
+      setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
+      setUsers(Array.isArray(usersData) ? usersData : [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadGroupsForDepartments = async (departmentIds: number[]) => {
+    try {
+      const allGroups: Group[] = []
+      for (const deptId of departmentIds) {
+        const groupsData = await groupsApi.getAll(deptId)
+        if (Array.isArray(groupsData)) {
+          allGroups.push(...groupsData)
+        }
+      }
+      setGroups(allGroups)
+    } catch (err) {
+      console.error('Erro ao carregar grupos:', err)
+    }
+  }
+
+  const handleTargetTypeChange = (targetType: TargetType) => {
+    setFormData(prev => ({
+      ...prev,
+      target_type: targetType,
+      selected_departments: [],
+      selected_groups: [],
+      selected_users: [],
+    }))
+  }
+
+  const handleDepartmentToggle = (deptId: number) => {
+    setFormData(prev => {
+      const isSelected = prev.selected_departments.includes(deptId)
+      return {
+        ...prev,
+        selected_departments: isSelected
+          ? prev.selected_departments.filter(id => id !== deptId)
+          : [...prev.selected_departments, deptId],
+        selected_groups: isSelected ? prev.selected_groups.filter(g => {
+          const group = groups.find(gr => gr.id === g)
+          return group && group.department_id !== deptId
+        }) : prev.selected_groups,
+      }
+    })
+  }
+
+  const handleGroupToggle = (groupId: number) => {
+    setFormData(prev => {
+      const isSelected = prev.selected_groups.includes(groupId)
+      return {
+        ...prev,
+        selected_groups: isSelected
+          ? prev.selected_groups.filter(id => id !== groupId)
+          : [...prev.selected_groups, groupId],
+      }
+    })
+  }
+
+  const handleUserToggle = (userId: number) => {
+    setFormData(prev => {
+      const isSelected = prev.selected_users.includes(userId)
+      return {
+        ...prev,
+        selected_users: isSelected
+          ? prev.selected_users.filter(id => id !== userId)
+          : [...prev.selected_users, userId],
+      }
+    })
+  }
+
+  const handleOpenModal = () => {
+    setFormData({
+      department_id: '',
+      title: '',
+      description: '',
+      type: NotificationType.NORMAL,
+      requires_acceptance: false,
+      target_type: 'all',
+      selected_departments: [],
+      selected_groups: [],
+      selected_users: [],
+    })
+    setShowModal(true)
+    setError(null)
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setError(null)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    if (!formData.title.trim() || !formData.description.trim()) {
+      setError('Título e descrição são obrigatórios')
+      return
+    }
+
+    // Validar targets baseado no tipo
+    if (formData.target_type === 'department' && formData.selected_departments.length === 0) {
+      setError('Selecione pelo menos um departamento')
+      return
+    }
+
+    if (formData.target_type === 'group' && formData.selected_groups.length === 0) {
+      setError('Selecione pelo menos um grupo')
+      return
+    }
+
+    if (formData.target_type === 'user' && formData.selected_users.length === 0) {
+      setError('Selecione pelo menos um usuário')
+      return
+    }
+
+    try {
+      // Construir array de targets
+      const targets: Array<{ target_type: string; target_id?: number }> = []
+
+      if (formData.target_type === 'all') {
+        targets.push({ target_type: 'all' })
+      } else if (formData.target_type === 'department') {
+        formData.selected_departments.forEach(deptId => {
+          targets.push({ target_type: 'department', target_id: deptId })
+        })
+      } else if (formData.target_type === 'group') {
+        formData.selected_groups.forEach(groupId => {
+          targets.push({ target_type: 'group', target_id: groupId })
+        })
+      } else if (formData.target_type === 'user') {
+        formData.selected_users.forEach(userId => {
+          targets.push({ target_type: 'user', target_id: userId })
+        })
+      }
+
+      await notificationsApi.create({
+        company_id: user!.company_id,
+        department_id: formData.department_id ? Number(formData.department_id) : undefined,
+        title: formData.title,
+        description: formData.description,
+        type: formData.type,
+        requires_acceptance: formData.requires_acceptance,
+        targets,
+      })
+
+      handleCloseModal()
+      loadData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar notificação')
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Tem certeza que deseja deletar esta notificação? Esta ação não pode ser desfeita.')) {
+      return
+    }
+
+    try {
+      await notificationsApi.delete(id)
+      loadData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao deletar notificação')
+    }
+  }
+
+  if (loading) {
+    return <div className="admin-notifications__loading">Carregando...</div>
+  }
+
+  const canCreateGroups = canCreateGroupNotifications(user?.role || '')
+
   return (
-    <div>
-      <h1>Criar Notificações</h1>
-      <p>Em desenvolvimento...</p>
+    <div className="admin-notifications">
+      <div className="admin-notifications__header">
+        <h1 className="admin-notifications__title">Gerenciar Notificações</h1>
+        <button
+          className="admin-notifications__add-button"
+          onClick={handleOpenModal}
+        >
+          + Nova Notificação
+        </button>
+      </div>
+
+      {error && (
+        <div className="admin-notifications__error">
+          {error}
+        </div>
+      )}
+
+      <div className="admin-notifications__list">
+        {notifications.length === 0 ? (
+          <div className="admin-notifications__empty">
+            <p>Nenhuma notificação criada</p>
+          </div>
+        ) : (
+          notifications.map((notification) => (
+            <div key={notification.id} className="admin-notifications__card">
+              <div className="admin-notifications__card-content">
+                <div className="admin-notifications__card-header">
+                  <h3 className="admin-notifications__card-title">{notification.title}</h3>
+                  <span className={`admin-notifications__type-badge admin-notifications__type-badge--${notification.type}`}>
+                    {notification.type}
+                  </span>
+                </div>
+                <p className="admin-notifications__card-description">{notification.description}</p>
+                <div className="admin-notifications__card-meta">
+                  <span>Departamento: {notification.department_name || 'N/A'}</span>
+                  <span>Requer aceitação: {notification.requires_acceptance ? 'Sim' : 'Não'}</span>
+                  <span>Criada em: {new Date(notification.created_at).toLocaleDateString('pt-BR')}</span>
+                </div>
+              </div>
+              <div className="admin-notifications__card-actions">
+                <button
+                  className="admin-notifications__delete-button"
+                  onClick={() => handleDelete(notification.id)}
+                >
+                  Deletar
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {showModal && (
+        <div className="admin-notifications__modal-overlay" onClick={handleCloseModal}>
+          <div className="admin-notifications__modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-notifications__modal-header">
+              <h2>Nova Notificação</h2>
+              <button className="admin-notifications__modal-close" onClick={handleCloseModal}>
+                ×
+              </button>
+            </div>
+            <form className="admin-notifications__form" onSubmit={handleSubmit}>
+              <div className="admin-notifications__field">
+                <label htmlFor="department_id">Departamento (Opcional)</label>
+                <select
+                  id="department_id"
+                  value={formData.department_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, department_id: e.target.value }))}
+                >
+                  <option value="">Nenhum</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="admin-notifications__field">
+                <label htmlFor="title">Título *</label>
+                <input
+                  type="text"
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="admin-notifications__field">
+                <label htmlFor="description">Descrição *</label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={4}
+                  required
+                />
+              </div>
+              <div className="admin-notifications__field">
+                <label htmlFor="type">Tipo *</label>
+                <select
+                  id="type"
+                  value={formData.type}
+                  onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                  required
+                >
+                  <option value={NotificationType.NORMAL}>Normal</option>
+                  <option value={NotificationType.URGENT}>Urgente</option>
+                  <option value={NotificationType.IMPORTANT}>Importante</option>
+                  <option value={NotificationType.INFO}>Informação</option>
+                </select>
+              </div>
+              <div className="admin-notifications__field">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={formData.requires_acceptance}
+                    onChange={(e) => setFormData(prev => ({ ...prev, requires_acceptance: e.target.checked }))}
+                  />
+                  Requer aceitação/rejeição
+                </label>
+              </div>
+
+              <div className="admin-notifications__field">
+                <label>Destinatários *</label>
+                <div className="admin-notifications__target-types">
+                  <label>
+                    <input
+                      type="radio"
+                      name="target_type"
+                      value="all"
+                      checked={formData.target_type === 'all'}
+                      onChange={() => handleTargetTypeChange('all')}
+                    />
+                    Todos os usuários da empresa
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="target_type"
+                      value="department"
+                      checked={formData.target_type === 'department'}
+                      onChange={() => handleTargetTypeChange('department')}
+                    />
+                    Departamentos específicos
+                  </label>
+                  {canCreateGroups && (
+                    <label>
+                      <input
+                        type="radio"
+                        name="target_type"
+                        value="group"
+                        checked={formData.target_type === 'group'}
+                        onChange={() => handleTargetTypeChange('group')}
+                      />
+                      Grupos específicos
+                    </label>
+                  )}
+                  <label>
+                    <input
+                      type="radio"
+                      name="target_type"
+                      value="user"
+                      checked={formData.target_type === 'user'}
+                      onChange={() => handleTargetTypeChange('user')}
+                    />
+                    Usuários específicos
+                  </label>
+                </div>
+              </div>
+
+              {formData.target_type === 'department' && (
+                <div className="admin-notifications__field">
+                  <label>Selecione Departamentos</label>
+                  <div className="admin-notifications__checklist">
+                    {departments.map((dept) => (
+                      <label key={dept.id} className="admin-notifications__checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={formData.selected_departments.includes(dept.id)}
+                          onChange={() => handleDepartmentToggle(dept.id)}
+                        />
+                        {dept.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {formData.target_type === 'group' && (
+                <>
+                  <div className="admin-notifications__field">
+                    <label>Selecione Departamentos (para filtrar grupos)</label>
+                    <div className="admin-notifications__checklist">
+                      {departments.map((dept) => (
+                        <label key={dept.id} className="admin-notifications__checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={formData.selected_departments.includes(dept.id)}
+                            onChange={() => handleDepartmentToggle(dept.id)}
+                          />
+                          {dept.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  {formData.selected_departments.length > 0 && (
+                    <div className="admin-notifications__field">
+                      <label>Selecione Grupos</label>
+                      <div className="admin-notifications__checklist">
+                        {groups.length === 0 ? (
+                          <p className="admin-notifications__no-groups">
+                            Selecione departamentos para ver os grupos disponíveis
+                          </p>
+                        ) : (
+                          groups.map((group) => (
+                            <label key={group.id} className="admin-notifications__checkbox-item">
+                              <input
+                                type="checkbox"
+                                checked={formData.selected_groups.includes(group.id)}
+                                onChange={() => handleGroupToggle(group.id)}
+                              />
+                              {group.name} ({departments.find(d => d.id === group.department_id)?.name})
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {formData.target_type === 'user' && (
+                <div className="admin-notifications__field">
+                  <label>Selecione Usuários</label>
+                  <div className="admin-notifications__checklist">
+                    {users.map((usr) => (
+                      <label key={usr.id} className="admin-notifications__checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={formData.selected_users.includes(usr.id)}
+                          onChange={() => handleUserToggle(usr.id)}
+                        />
+                        {usr.full_name} ({usr.email})
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {error && <div className="admin-notifications__form-error">{error}</div>}
+              <div className="admin-notifications__form-actions">
+                <button type="button" onClick={handleCloseModal}>Cancelar</button>
+                <button type="submit">Criar Notificação</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default AdminNotifications
-

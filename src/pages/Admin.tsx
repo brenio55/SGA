@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Header from '../Header'
 import AdminLayout from '../components/Admin/AdminLayout'
+import AdminRoute from '../components/Admin/AdminRoute'
 import AdminDashboard from '../components/Admin/AdminDashboard'
 import AdminCompanies from '../components/Admin/AdminCompanies'
 import AdminUsers from '../components/Admin/AdminUsers'
@@ -16,10 +17,38 @@ function Admin() {
       <AdminLayout>
         <Routes>
           <Route path="/" element={<AdminDashboard />} />
-          <Route path="/companies" element={<AdminCompanies />} />
-          <Route path="/users" element={<AdminUsers />} />
-          <Route path="/departments" element={<AdminDepartments />} />
-          <Route path="/groups" element={<AdminGroups />} />
+          <Route 
+            path="/companies" 
+            element={
+              <AdminRoute requireSuperAdmin>
+                <AdminCompanies />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/users" 
+            element={
+              <AdminRoute requireAdmin>
+                <AdminUsers />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/departments" 
+            element={
+              <AdminRoute requireManager>
+                <AdminDepartments />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/groups" 
+            element={
+              <AdminRoute requireManager>
+                <AdminGroups />
+              </AdminRoute>
+            } 
+          />
           <Route path="/notifications" element={<AdminNotifications />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>

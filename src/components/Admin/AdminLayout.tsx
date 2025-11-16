@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { UserRole, canManageCompanies } from '../../utils/roles'
+import { UserRole, canManageCompanies, canManageUsers, canCreateNotifications, hasPermission } from '../../utils/roles'
 import './AdminLayout.css'
 
 interface AdminLayoutProps {
@@ -11,16 +11,42 @@ interface AdminLayoutProps {
 function AdminLayout({ children }: AdminLayoutProps) {
   const { user } = useAuth()
   const location = useLocation()
-  const isSuperAdmin = user?.role === UserRole.SUPER_ADMIN
+  const userRole = user?.role || ''
 
+  // Construir menu baseado nas permissões
   const menuItems = [
-    { path: '/admin', label: 'Dashboard', icon: '📊' },
-    ...(isSuperAdmin ? [{ path: '/admin/companies', label: 'Empresas', icon: '🏢' }] : []),
-    { path: '/admin/users', label: 'Usuários', icon: '👥' },
-    { path: '/admin/departments', label: 'Departamentos', icon: '📁' },
-    { path: '/admin/groups', label: 'Grupos', icon: '👤' },
-    { path: '/admin/notifications', label: 'Notificações', icon: '🔔' },
-  ]
+    { path: '/admin', label: 'Dashboard', icon: '📊', show: true },
+    { 
+      path: '/admin/companies', 
+      label: 'Empresas', 
+      icon: '🏢', 
+      show: canManageCompanies(userRole) 
+    },
+    { 
+      path: '/admin/users', 
+      label: 'Usuários', 
+      icon: '👥', 
+      show: canManageUsers(userRole) 
+    },
+    { 
+      path: '/admin/departments', 
+      label: 'Departamentos', 
+      icon: '📁', 
+      show: hasPermission(userRole as UserRole, UserRole.MANAGER) 
+    },
+    { 
+      path: '/admin/groups', 
+      label: 'Grupos', 
+      icon: '👤', 
+      show: hasPermission(userRole as UserRole, UserRole.MANAGER) 
+    },
+    { 
+      path: '/admin/notifications', 
+      label: 'Notificações', 
+      icon: '🔔', 
+      show: canCreateNotifications(userRole) 
+    },
+  ].filter(item => item.show)
 
   return (
     <div className="admin-layout">
