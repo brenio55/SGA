@@ -31,6 +31,7 @@ class Notification {
 
   static async findForUser(userId, companyId) {
     // Busca notificações que o usuário deve receber baseado nos targets
+    // EXCLUI notificações já visualizadas, aceitas ou rejeitadas (essas vão apenas para o histórico)
     // Inclui informação sobre se o usuário já respondeu (aceitou/rejeitou)
     return await db.db`
       SELECT DISTINCT 
@@ -52,7 +53,10 @@ class Notification {
       )
       LEFT JOIN notification_responses nr ON n.id = nr.notification_id AND nr.user_id = ${userId}
       LEFT JOIN notification_views nv ON n.id = nv.notification_id AND nv.user_id = ${userId}
-      WHERE u.id = ${userId} AND n.company_id = ${companyId}
+      WHERE u.id = ${userId} 
+        AND n.company_id = ${companyId}
+        AND nr.id IS NULL  -- Excluir notificações já respondidas (aceitas ou rejeitadas)
+        AND nv.id IS NULL  -- Excluir notificações já visualizadas
       ORDER BY n.created_at DESC
     `;
   }

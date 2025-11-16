@@ -174,6 +174,16 @@ function Header() {
                     className="header__user-menu-item"
                     onClick={() => {
                       setShowUserMenu(false)
+                      navigate('/')
+                    }}
+                  >
+                    <span className="header__user-menu-icon">🏠</span>
+                    <span>Home</span>
+                  </button>
+                  <button
+                    className="header__user-menu-item"
+                    onClick={() => {
+                      setShowUserMenu(false)
                       navigate('/history')
                     }}
                   >
