@@ -117,13 +117,14 @@ class Notification {
   }
 
   static async findViewedByUser(userId, companyId) {
-    // Busca todas as notificações visualizadas pelo usuário
+    // Busca todas as notificações visualizadas, aceitas ou rejeitadas pelo usuário
+    // Usa UNION para pegar notificações que foram visualizadas OU respondidas
     return await db.db`
       SELECT DISTINCT 
         n.*, 
         d.name as department_name,
         nr.response_type as user_response,
-        nv.viewed_at,
+        COALESCE(nv.viewed_at, nr.responded_at) as viewed_at,
         nr.responded_at
       FROM notifications n
       LEFT JOIN departments d ON n.department_id = d.id
@@ -134,10 +135,12 @@ class Notification {
         (nt.target_type = 'group' AND nt.target_id = u.group_id) OR
         (nt.target_type = 'all' AND n.company_id = u.company_id)
       )
-      INNER JOIN notification_views nv ON n.id = nv.notification_id AND nv.user_id = ${userId}
+      LEFT JOIN notification_views nv ON n.id = nv.notification_id AND nv.user_id = ${userId}
       LEFT JOIN notification_responses nr ON n.id = nr.notification_id AND nr.user_id = ${userId}
-      WHERE u.id = ${userId} AND n.company_id = ${companyId}
-      ORDER BY nv.viewed_at DESC
+      WHERE u.id = ${userId} 
+        AND n.company_id = ${companyId}
+        AND (nv.id IS NOT NULL OR nr.id IS NOT NULL)  -- Visualizada OU respondida
+      ORDER BY COALESCE(nv.viewed_at, nr.responded_at) DESC
     `;
   }
 }
