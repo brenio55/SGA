@@ -85,6 +85,35 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
+.header__admin-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.header__admin-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.header__admin-icon {
+  font-size: 16px;
+}
+
+.header__admin-text {
+  font-size: 14px;
+}
+
 
 .header__date-text,
 .header__time-text {
@@ -118,10 +147,15 @@
   }
 
   .header__date,
-  .header__time {
+  .header__time,
+  .header__admin-button {
     flex: 1;
     justify-content: center;
     padding: 10px 12px;
+  }
+
+  .header__admin-text {
+    display: none;
   }
 
   .header__date-text {

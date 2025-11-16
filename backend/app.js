@@ -6,6 +6,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 import db from './db.js';
 
+// Import middleware
+import requestLogger from './middleware/requestLogger.js';
+
 // Import routes
 import notificationRoutes from './routes/notificationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -16,8 +19,11 @@ import groupRoutes from './routes/groupRoutes.js';
 const app = express();
 const port = 3001;
 
-app.use(express.json());
 app.use(cors('*'));
+app.use(express.json());
+
+// Middleware de logging (deve vir depois do express.json para capturar o body)
+app.use(requestLogger);
 
 function testDbConnection() {
   db.db`SELECT 1`
