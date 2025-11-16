@@ -37,8 +37,12 @@ function AdminDepartments() {
   const loadData = async () => {
     try {
       setLoading(true)
+      // Para super_admin, carregar todos os departamentos (sem filtro)
+      // Para outros, filtrar pela empresa do usuário
+      const companyIdForFilter = user?.role === 'super_admin' ? undefined : user?.company_id
+      
       const [departmentsData, companiesData] = await Promise.all([
-        departmentsApi.getAll(user?.company_id),
+        departmentsApi.getAll(companyIdForFilter),
         user?.role === 'super_admin' ? companiesApi.getAll() : Promise.resolve([]),
       ])
 
@@ -159,6 +163,11 @@ function AdminDepartments() {
                     <h3 className="admin-departments__card-name">{department.name}</h3>
                     <span className="admin-departments__card-id">ID: {department.id}</span>
                   </div>
+                  {user?.role === 'super_admin' && (
+                    <p className="admin-departments__card-company">
+                      Empresa: {companies.find(c => c.id === department.company_id)?.name || `ID: ${department.company_id}`}
+                    </p>
+                  )}
                   <p className="admin-departments__card-date">
                     Criado em: {new Date(department.created_at).toLocaleDateString('pt-BR')}
                   </p>

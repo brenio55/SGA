@@ -63,6 +63,13 @@ function AdminUsers() {
   }, [currentUser?.id, currentUser?.role, currentUser?.company_id])
 
   useEffect(() => {
+    // Para super_admin, carregar departamentos quando a empresa for selecionada
+    if (currentUser?.role === UserRole.SUPER_ADMIN && formData.company_id) {
+      loadDepartmentsForCompany(formData.company_id)
+    }
+  }, [formData.company_id, currentUser?.role])
+
+  useEffect(() => {
     if (formData.department_id) {
       loadGroups(Number(formData.department_id))
     } else {
@@ -82,21 +89,38 @@ function AdminUsers() {
         ? undefined 
         : currentUser?.company_id
 
-      const [usersData, companiesData, departmentsData] = await Promise.all([
+      const [usersData, companiesData] = await Promise.all([
         usersApi.getAll(companyIdForFilter),
         companiesApi.getAll(),
-        departmentsApi.getAll(currentUser?.company_id),
       ])
 
       setUsers(Array.isArray(usersData) ? usersData : [])
       setCompanies(Array.isArray(companiesData) ? companiesData : [])
-      setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
+      
+      // Para super_admin, não carregar departamentos aqui (será carregado quando selecionar empresa)
+      // Para outros, carregar departamentos da empresa
+      if (currentUser?.role !== UserRole.SUPER_ADMIN && currentUser?.company_id) {
+        const departmentsData = await departmentsApi.getAll(currentUser.company_id)
+        setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
+      } else {
+        setDepartments([])
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados'
       setError(errorMessage)
       console.error('Erro ao carregar dados:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadDepartmentsForCompany = async (companyId: number) => {
+    try {
+      const departmentsData = await departmentsApi.getAll(companyId)
+      setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
+    } catch (err) {
+      console.error('Erro ao carregar departamentos:', err)
+      setDepartments([])
     }
   }
 
@@ -145,6 +169,10 @@ function AdminUsers() {
         password: '',
         image_base64: user.image_base64 || '',
       })
+      // Carregar departamentos da empresa do usuário sendo editado
+      if (currentUser?.role === UserRole.SUPER_ADMIN && user.company_id) {
+        loadDepartmentsForCompany(user.company_id)
+      }
       if (user.department_id) {
         loadGroups(user.department_id)
       }
@@ -162,6 +190,10 @@ function AdminUsers() {
       })
       setGroups([])
       setImageFile(null)
+      // Para super_admin, limpar departamentos ao criar novo usuário
+      if (currentUser?.role === UserRole.SUPER_ADMIN) {
+        setDepartments([])
+      }
     }
     setShowModal(true)
     setError(null)
@@ -347,7 +379,15 @@ function AdminUsers() {
                   <select
                     id="company_id"
                     value={formData.company_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, company_id: Number(e.target.value) }))}
+                    onChange={(e) => {
+                      const companyId = Number(e.target.value)
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        company_id: companyId,
+                        department_id: '', // Reset department when company changes
+                        group_id: '', // Reset group when company changes
+                      }))
+                    }}
                     required
                   >
                     <option value="">Selecione...</option>
@@ -421,17 +461,31 @@ function AdminUsers() {
               </div>
               <div className="admin-users__field">
                 <label htmlFor="department_id">Departamento</label>
+                {currentUser?.role === UserRole.SUPER_ADMIN && !formData.company_id && (
+                  <p className="admin-users__field-hint">
+                    Selecione uma empresa primeiro para ver os departamentos disponíveis.
+                  </p>
+                )}
                 <select
                   id="department_id"
                   value={formData.department_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, department_id: e.target.value, group_id: '' }))}
+                  disabled={currentUser?.role === UserRole.SUPER_ADMIN && !formData.company_id}
                 >
                   <option value="">Nenhum</option>
-                  {departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
+                  {departments
+                    .filter(dept => {
+                      // Para super_admin, filtrar pela empresa selecionada
+                      // Para outros, já vem filtrado
+                      return currentUser?.role === UserRole.SUPER_ADMIN
+                        ? (dept as any).company_id === formData.company_id
+                        : true
+                    })
+                    .map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
                 </select>
               </div>
               {formData.department_id && (

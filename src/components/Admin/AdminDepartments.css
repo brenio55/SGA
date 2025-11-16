@@ -98,6 +98,13 @@
   font-weight: 500;
 }
 
+.admin-departments__card-company {
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 500;
+  margin: 4px 0;
+}
+
 .admin-departments__card-date {
   font-size: 14px;
   color: #718096;
