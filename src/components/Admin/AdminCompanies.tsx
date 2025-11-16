@@ -167,7 +167,10 @@ function AdminCompanies() {
                   />
                 )}
                 <div className="admin-companies__card-info">
-                  <h3 className="admin-companies__card-name">{company.name}</h3>
+                  <div className="admin-companies__card-header">
+                    <h3 className="admin-companies__card-name">{company.name}</h3>
+                    <span className="admin-companies__card-id">ID: {company.id}</span>
+                  </div>
                   <p className="admin-companies__card-date">
                     Criada em: {new Date(company.created_at).toLocaleDateString('pt-BR')}
                   </p>

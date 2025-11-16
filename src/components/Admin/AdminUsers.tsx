@@ -262,6 +262,7 @@ function AdminUsers() {
         <table className="admin-users__table">
           <thead>
             <tr>
+              <th>ID</th>
               <th>Nome</th>
               <th>Email</th>
               <th>Role</th>
@@ -273,13 +274,16 @@ function AdminUsers() {
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="admin-users__empty">
+                <td colSpan={7} className="admin-users__empty">
                   Nenhum usuário cadastrado
                 </td>
               </tr>
             ) : (
               users.map((user) => (
                 <tr key={user.id}>
+                  <td>
+                    <span className="admin-users__id-badge">{user.id}</span>
+                  </td>
                   <td>
                     <div className="admin-users__user-info">
                       {user.image_base64 && (

@@ -283,7 +283,10 @@ function AdminNotifications() {
             <div key={notification.id} className="admin-notifications__card">
               <div className="admin-notifications__card-content">
                 <div className="admin-notifications__card-header">
-                  <h3 className="admin-notifications__card-title">{notification.title}</h3>
+                  <div className="admin-notifications__card-title-section">
+                    <h3 className="admin-notifications__card-title">{notification.title}</h3>
+                    <span className="admin-notifications__card-id">ID: {notification.id}</span>
+                  </div>
                   <span className={`admin-notifications__type-badge admin-notifications__type-badge--${notification.type}`}>
                     {notification.type}
                   </span>

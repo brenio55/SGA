@@ -91,6 +91,17 @@
   border: 2px solid #e2e8f0;
 }
 
+.admin-users__id-badge {
+  display: inline-block;
+  font-size: 12px;
+  color: #718096;
+  background: #edf2f7;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
 .admin-users__role-badge {
   display: inline-block;
   padding: 4px 12px;

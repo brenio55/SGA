@@ -79,6 +79,16 @@
   min-width: 200px;
 }
 
+.notification-card__id {
+  font-size: 11px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+}
+
 .notification-badge {
   display: inline-flex;
   align-items: center;

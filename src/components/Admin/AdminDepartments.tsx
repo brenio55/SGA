@@ -155,7 +155,10 @@ function AdminDepartments() {
                   style={{ backgroundColor: department.color || '#667eea' }}
                 ></div>
                 <div className="admin-departments__card-info">
-                  <h3 className="admin-departments__card-name">{department.name}</h3>
+                  <div className="admin-departments__card-header">
+                    <h3 className="admin-departments__card-name">{department.name}</h3>
+                    <span className="admin-departments__card-id">ID: {department.id}</span>
+                  </div>
                   <p className="admin-departments__card-date">
                     Criado em: {new Date(department.created_at).toLocaleDateString('pt-BR')}
                   </p>

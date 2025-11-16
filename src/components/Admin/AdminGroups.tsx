@@ -161,7 +161,10 @@ function AdminGroups() {
             <div key={group.id} className="admin-groups__card">
               <div className="admin-groups__card-content">
                 <div className="admin-groups__card-info">
-                  <h3 className="admin-groups__card-name">{group.name}</h3>
+                  <div className="admin-groups__card-header">
+                    <h3 className="admin-groups__card-name">{group.name}</h3>
+                    <span className="admin-groups__card-id">ID: {group.id}</span>
+                  </div>
                   <p className="admin-groups__card-department">
                     Departamento: {getDepartmentName(group.department_id)}
                   </p>

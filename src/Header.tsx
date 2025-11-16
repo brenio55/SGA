@@ -122,7 +122,8 @@ function Header() {
             <h1 className="header__title">
               {loadingCompany ? 'Carregando...' : (company?.name || 'SGA-BMS')}
             </h1>
-            <p className="header__subtitle">Sistema de Gestão e Avisos</p>
+            <p className="header__subtitle">Sistema de Gestão A</p>
+            <p className="header__subtitle">Business Management System</p>
           </div>
         </div>
         

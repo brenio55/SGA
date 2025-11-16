@@ -88,6 +88,7 @@ function Notification({
         <div className="notification-card__left">
           <div className="notification-card__title-section">
             <h4 className="notification-card__title">{mockNotification.title}</h4>
+            <span className="notification-card__id">ID: {mockNotification.id || 'N/A'}</span>
             {localStatus === NotificationStatus.PENDING && (
               <span className="notification-badge notification-badge--new">Nova</span>
             )}
