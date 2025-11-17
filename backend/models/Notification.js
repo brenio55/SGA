@@ -155,7 +155,7 @@ class Notification {
           -- Notificações visualizadas SEM aceite também vão para histórico
           (nv.id IS NOT NULL AND n.requires_acceptance = false)
         )
-      ORDER BY COALESCE(nr.responded_at, nv.viewed_at) DESC
+      ORDER BY viewed_at DESC
     `;
   }
 
