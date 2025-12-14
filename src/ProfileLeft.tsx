@@ -155,9 +155,9 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
           <h3 className="profile-sidebar__name">
             {loadingUser ? 'Carregando...' : (user?.full_name || 'Usuário')}
           </h3>
-          <p className="profile-sidebar__role">
+          {/* <p className="profile-sidebar__role">
             {loadingUser ? '...' : (user?.role || 'N/A')}
-          </p>
+          </p> */}
           <p className="profile-sidebar__department">
             {loadingUser ? '...' : (user?.department_name || 'N/A')}
           </p>

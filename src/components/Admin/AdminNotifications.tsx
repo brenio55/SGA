@@ -73,7 +73,7 @@ function AdminNotifications() {
     title: '',
     description: '',
     type: NotificationType.NORMAL,
-    requires_acceptance: false,
+    requires_acceptance: true,
     target_type: 'all' as TargetType,
     selected_departments: [] as number[],
     selected_groups: [] as number[],

@@ -164,12 +164,12 @@ function Notification({
                 >
                   ✓ Aceitar
                 </button>
-                <button 
+                {/* <button 
                   className="notification-button notification-button--reject"
                   onClick={handleReject}
                 >
                   ✕ Rejeitar
-                </button>
+                </button> */}
               </div>
             )}
 
