@@ -1,12 +1,14 @@
 // Sistema de Roles e Permissões
 
-export enum UserRole {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  MANAGER = 'manager',
-  MODERATOR = 'moderator',
-  USER = 'user'
-}
+export const UserRole = {
+  SUPER_ADMIN: 'super_admin',
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  MODERATOR: 'moderator',
+  USER: 'user'
+} as const;
+
+export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export const RoleHierarchy: Record<UserRole, number> = {
   [UserRole.SUPER_ADMIN]: 5,

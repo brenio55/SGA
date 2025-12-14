@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
 import { companiesApi } from '../../services/api'
 import './AdminCompanies.css'
 
@@ -12,7 +11,6 @@ interface Company {
 }
 
 function AdminCompanies() {
-  const { user } = useAuth()
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)

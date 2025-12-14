@@ -56,7 +56,18 @@ function AdminNotifications() {
   const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null)
   const [companySearch, setCompanySearch] = useState('')
   const [departmentSearch, setDepartmentSearch] = useState('')
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    company_id: number;
+    department_id: string;
+    title: string;
+    description: string;
+    type: string;
+    requires_acceptance: boolean;
+    target_type: TargetType;
+    selected_departments: number[];
+    selected_groups: number[];
+    selected_users: number[];
+  }>({
     company_id: user?.company_id || 0,
     department_id: '',
     title: '',
@@ -101,7 +112,7 @@ function AdminNotifications() {
       // Para não-super_admin, sempre usar a empresa do usuário logado
       const finalCompanyId = user?.role === UserRole.SUPER_ADMIN ? companyId : user?.company_id
       if (!finalCompanyId) return
-      
+
       const departmentsData = await departmentsApi.getAll(finalCompanyId)
       setDepartments(Array.isArray(departmentsData) ? departmentsData : [])
     } catch (err) {
@@ -262,7 +273,7 @@ function AdminNotifications() {
     try {
       // Se não tiver departamento selecionado, a notificação deve ser para todos
       const finalTargetType = !formData.department_id ? 'all' : formData.target_type
-      
+
       // Construir array de targets
       const targets: Array<{ target_type: string; target_id?: number }> = []
 
@@ -283,7 +294,7 @@ function AdminNotifications() {
       }
 
       // Para não-super_admin, sempre usar a empresa do usuário logado
-      const finalCompanyId = user?.role === UserRole.SUPER_ADMIN 
+      const finalCompanyId = user?.role === UserRole.SUPER_ADMIN
         ? (formData.company_id || user!.company_id)
         : user!.company_id
 
@@ -367,7 +378,7 @@ function AdminNotifications() {
                 </div>
               </div>
               <div className="admin-notifications__card-actions">
-                {(hasPermission(user?.role || '', UserRole.MANAGER) || user?.role === UserRole.SUPER_ADMIN) && (
+                {(hasPermission(user?.role as UserRole || UserRole.USER, UserRole.MANAGER) || user?.role === UserRole.SUPER_ADMIN) && (
                   <button
                     className="admin-notifications__details-button"
                     onClick={() => setSelectedNotificationId(notification.id)}
@@ -413,8 +424,8 @@ function AdminNotifications() {
                     value={formData.company_id}
                     onChange={(e) => {
                       const companyId = Number(e.target.value)
-                      setFormData(prev => ({ 
-                        ...prev, 
+                      setFormData(prev => ({
+                        ...prev,
                         company_id: companyId,
                         department_id: '', // Reset department when company changes
                       }))
@@ -424,8 +435,8 @@ function AdminNotifications() {
                   >
                     <option value="">Selecione uma empresa</option>
                     {companies
-                      .filter(company => 
-                        !companySearch || 
+                      .filter(company =>
+                        !companySearch ||
                         company.id.toString().includes(companySearch) ||
                         company.name.toLowerCase().includes(companySearch.toLowerCase())
                       )
@@ -454,8 +465,8 @@ function AdminNotifications() {
                   value={formData.department_id}
                   onChange={(e) => {
                     const deptId = e.target.value
-                    setFormData(prev => ({ 
-                      ...prev, 
+                    setFormData(prev => ({
+                      ...prev,
                       department_id: deptId,
                       // Se remover o departamento, voltar para 'all' apenas se estava usando departamento/grupo
                       target_type: !deptId && (prev.target_type === 'department' || prev.target_type === 'group') ? 'all' : prev.target_type
@@ -470,11 +481,11 @@ function AdminNotifications() {
                       const companyFilter = user?.role === UserRole.SUPER_ADMIN
                         ? (!formData.company_id || dept.company_id === formData.company_id)
                         : (dept.company_id === user?.company_id)
-                      
-                      const searchFilter = !departmentSearch || 
+
+                      const searchFilter = !departmentSearch ||
                         dept.id.toString().includes(departmentSearch) ||
                         dept.name.toLowerCase().includes(departmentSearch.toLowerCase())
-                      
+
                       return companyFilter && searchFilter
                     })
                     .map((dept) => (

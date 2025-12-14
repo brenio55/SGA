@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { UserRole, canManageCompanies, canManageUsers, canCreateNotifications, hasPermission } from '../../utils/roles'
@@ -16,35 +16,35 @@ function AdminLayout({ children }: AdminLayoutProps) {
   // Construir menu baseado nas permissões
   const menuItems = [
     { path: '/admin', label: 'Dashboard', icon: '📊', show: true },
-    { 
-      path: '/admin/companies', 
-      label: 'Empresas', 
-      icon: '🏢', 
-      show: canManageCompanies(userRole) 
+    {
+      path: '/admin/companies',
+      label: 'Empresas',
+      icon: '🏢',
+      show: canManageCompanies(userRole)
     },
-    { 
-      path: '/admin/users', 
-      label: 'Usuários', 
-      icon: '👥', 
-      show: canManageUsers(userRole) 
+    {
+      path: '/admin/users',
+      label: 'Usuários',
+      icon: '👥',
+      show: canManageUsers(userRole)
     },
-    { 
-      path: '/admin/departments', 
-      label: 'Departamentos', 
-      icon: '📁', 
-      show: hasPermission(userRole as UserRole, UserRole.MANAGER) 
+    {
+      path: '/admin/departments',
+      label: 'Departamentos',
+      icon: '📁',
+      show: hasPermission(userRole as UserRole, UserRole.MANAGER)
     },
-    { 
-      path: '/admin/groups', 
-      label: 'Grupos', 
-      icon: '👤', 
-      show: hasPermission(userRole as UserRole, UserRole.MANAGER) 
+    {
+      path: '/admin/groups',
+      label: 'Grupos',
+      icon: '👤',
+      show: hasPermission(userRole as UserRole, UserRole.MANAGER)
     },
-    { 
-      path: '/admin/notifications', 
-      label: 'Notificações', 
-      icon: '🔔', 
-      show: canCreateNotifications(userRole) 
+    {
+      path: '/admin/notifications',
+      label: 'Notificações',
+      icon: '🔔',
+      show: canCreateNotifications(userRole)
     },
   ].filter(item => item.show)
 

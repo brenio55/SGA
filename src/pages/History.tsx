@@ -44,7 +44,7 @@ function History() {
 
       const mappedNotifications = notificationsList.map((notif: NotificationData) => {
         // Determinar o status baseado na resposta do usuário
-        let status = NotificationStatus.READ
+        let status: NotificationStatus = NotificationStatus.READ
         if (notif.user_response === 'accepted') {
           status = NotificationStatus.ACCEPTED
         } else if (notif.user_response === 'rejected') {
@@ -94,7 +94,7 @@ function History() {
     }
   }
 
-  const handleRead = async (id: number | null) => {
+  const handleRead = async () => {
     // Não fazer nada no histórico, pois todas já foram visualizadas
   }
 

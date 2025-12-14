@@ -42,7 +42,16 @@ function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    company_id: number;
+    department_id: string;
+    group_id: string;
+    full_name: string;
+    role: string;
+    email: string;
+    password: string;
+    image_base64: string;
+  }>({
     company_id: currentUser?.company_id || 0,
     department_id: '',
     group_id: '',
@@ -82,11 +91,11 @@ function AdminUsers() {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Se for super_admin, não filtrar por company_id (ver todos)
       // Se for admin normal, filtrar pela empresa
-      const companyIdForFilter = currentUser?.role === UserRole.SUPER_ADMIN 
-        ? undefined 
+      const companyIdForFilter = currentUser?.role === UserRole.SUPER_ADMIN
+        ? undefined
         : currentUser?.company_id
 
       const [usersData, companiesData] = await Promise.all([
@@ -96,7 +105,7 @@ function AdminUsers() {
 
       setUsers(Array.isArray(usersData) ? usersData : [])
       setCompanies(Array.isArray(companiesData) ? companiesData : [])
-      
+
       // Para super_admin, não carregar departamentos aqui (será carregado quando selecionar empresa)
       // Para outros, carregar departamentos da empresa
       if (currentUser?.role !== UserRole.SUPER_ADMIN && currentUser?.company_id) {
@@ -381,8 +390,8 @@ function AdminUsers() {
                     value={formData.company_id}
                     onChange={(e) => {
                       const companyId = Number(e.target.value)
-                      setFormData(prev => ({ 
-                        ...prev, 
+                      setFormData(prev => ({
+                        ...prev,
                         company_id: companyId,
                         department_id: '', // Reset department when company changes
                         group_id: '', // Reset group when company changes

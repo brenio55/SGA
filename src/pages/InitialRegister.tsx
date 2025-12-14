@@ -101,7 +101,7 @@ function InitialRegister() {
       const company = await companiesApi.create({
         name: formData.company_name,
         logo_base64: formData.logo_base64 || undefined,
-      })
+      }) as any
 
       // 2. Criar usuário super_admin vinculado à empresa
       await register({
@@ -111,7 +111,7 @@ function InitialRegister() {
         password: formData.password,
         role: UserRole.SUPER_ADMIN,
         image_base64: formData.logo_base64 || undefined,
-      })
+      } as any)
 
       // Sucesso - redirecionar será feito pelo AuthContext
     } catch (error) {
@@ -138,7 +138,7 @@ function InitialRegister() {
         <form className="initial-register__form" onSubmit={handleSubmit}>
           <div className="initial-register__section">
             <h2 className="initial-register__section-title">Dados Pessoais</h2>
-            
+
             <div className="initial-register__field">
               <label htmlFor="full_name" className="initial-register__label">
                 Nome Completo *
@@ -214,7 +214,7 @@ function InitialRegister() {
 
           <div className="initial-register__section">
             <h2 className="initial-register__section-title">Dados da Empresa</h2>
-            
+
             <div className="initial-register__field">
               <label htmlFor="company_name" className="initial-register__label">
                 Nome da Empresa *

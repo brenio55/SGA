@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { UserRole } from '../utils/roles'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 
 interface User {
   id: number
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const storedUser = localStorage.getItem('user')
         const storedToken = localStorage.getItem('token')
-        
+
         if (storedUser && storedToken) {
           try {
             const parsedUser = JSON.parse(storedUser)
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         let errorMessage = 'Erro ao fazer login'
-        
+
         if (isJson) {
           try {
             const errorData = await response.json()
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             errorMessage = `Erro ${response.status}: ${response.statusText}`
           }
         }
-        
+
         throw new Error(errorMessage)
       }
 
@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json()
-      
+
       if (!data.user) {
         throw new Error('Dados do usuário não encontrados na resposta')
       }
@@ -159,10 +159,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { authApi } = await import('../services/api')
       const newUser = await authApi.register(userData)
-      
+
       // Remover senha da resposta
-      const { password: _, ...userWithoutPassword } = newUser
-      
+      const { password: _, ...userWithoutPassword } = newUser as any
+
       const registeredUser: User = {
         id: userWithoutPassword.id,
         company_id: userWithoutPassword.company_id,

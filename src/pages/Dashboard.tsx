@@ -43,7 +43,7 @@ function Dashboard() {
 
       const mappedNotifications = notificationsList.map((notif: NotificationData) => {
         // Determinar o status baseado na resposta do usuário e visualização
-        let status = NotificationStatus.PENDING
+        let status: NotificationStatus = NotificationStatus.PENDING
         if (notif.user_response === 'accepted') {
           status = NotificationStatus.ACCEPTED
         } else if (notif.user_response === 'rejected') {
@@ -148,10 +148,10 @@ function Dashboard() {
             </p>
           </div>
           {error && (
-            <div style={{ 
-              padding: '16px', 
-              background: '#fed7d7', 
-              color: '#c53030', 
+            <div style={{
+              padding: '16px',
+              background: '#fed7d7',
+              color: '#c53030',
               borderRadius: '8px',
               marginBottom: '16px'
             }}>

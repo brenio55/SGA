@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { UserRole, hasPermission } from '../utils/roles'
 
@@ -13,11 +13,11 @@ function ProtectedRoute({ children, requiredRole, requireSuperAdmin }: Protected
 
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
       }}>
         <p>Carregando...</p>
       </div>
@@ -26,10 +26,10 @@ function ProtectedRoute({ children, requiredRole, requireSuperAdmin }: Protected
 
   if (!isAuthenticated || !user) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '100vh',
         flexDirection: 'column',
         gap: '16px'
@@ -42,10 +42,10 @@ function ProtectedRoute({ children, requiredRole, requireSuperAdmin }: Protected
 
   if (requireSuperAdmin && user.role !== UserRole.SUPER_ADMIN) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '100vh',
         flexDirection: 'column',
         gap: '16px'
@@ -59,10 +59,10 @@ function ProtectedRoute({ children, requiredRole, requireSuperAdmin }: Protected
   if (requiredRole) {
     if (!hasPermission(user.role as UserRole, requiredRole)) {
       return (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '100vh',
           flexDirection: 'column',
           gap: '16px'

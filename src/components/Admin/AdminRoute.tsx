@@ -1,6 +1,6 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { UserRole, hasPermission, canManageCompanies, canManageUsers } from '../../utils/roles'
+import { UserRole, hasPermission, canManageUsers } from '../../utils/roles'
 
 interface AdminRouteProps {
   children: ReactNode

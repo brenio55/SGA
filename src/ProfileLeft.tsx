@@ -46,8 +46,8 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
 
     try {
       setLoadingUser(true)
-      const userData = await usersApi.getById(user.id)
-      
+      const userData = await usersApi.getById(user.id) as any
+
       // Atualizar o usuário no contexto com os dados mais recentes
       if (userData && updateUser) {
         updateUser({
@@ -80,7 +80,7 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Usar a rota específica de estatísticas que retorna dados já agrupados
       const statsData = await notificationsApi.getStatsForUser(user.id, user.company_id)
       const stats = Array.isArray(statsData) ? statsData : []
@@ -93,7 +93,7 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
       }))
 
       setNotificationStats(mappedStats)
-      
+
       // Calcular total de notificações
       const total = mappedStats.reduce((sum, stat) => sum + stat.count, 0)
       setTotalNotifications(total)
@@ -136,8 +136,8 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
       <div className="profile-sidebar__header">
         <div className="profile-sidebar__image-container">
           {user?.image_base64 ? (
-            <img 
-              src={user.image_base64} 
+            <img
+              src={user.image_base64}
               alt={user.full_name}
               className="profile-sidebar__image"
             />
@@ -196,8 +196,8 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
             notificationStats.map((stat, index) => (
               <div key={index} className="profile-sidebar__stat-item">
                 <div className="profile-sidebar__stat-info">
-                  <span 
-                    className="profile-sidebar__stat-color" 
+                  <span
+                    className="profile-sidebar__stat-color"
                     style={{ backgroundColor: stat.color }}
                   ></span>
                   <span className="profile-sidebar__stat-label">{stat.department}</span>
@@ -214,8 +214,8 @@ function ProfileLeft({ onRefresh }: ProfileLeftProps) {
       </div>
 
       <div className="profile-sidebar__actions">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="profile-sidebar__refresh-button"
           onClick={handleRefresh}
           disabled={isRefreshing}

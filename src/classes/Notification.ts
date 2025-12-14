@@ -1,16 +1,20 @@
-export enum NotificationType {
-  NORMAL = 'normal',
-  URGENT = 'urgent',
-  IMPORTANT = 'important',
-  INFO = 'info'
-}
+export const NotificationType = {
+  NORMAL: 'normal',
+  URGENT: 'urgent',
+  IMPORTANT: 'important',
+  INFO: 'info'
+} as const;
 
-export enum NotificationStatus {
-  PENDING = 'pending',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
-  READ = 'read'
-}
+export type NotificationType = typeof NotificationType[keyof typeof NotificationType];
+
+export const NotificationStatus = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+  READ: 'read'
+} as const;
+
+export type NotificationStatus = typeof NotificationStatus[keyof typeof NotificationStatus];
 
 export class Notification {
   private _id: number | null;
