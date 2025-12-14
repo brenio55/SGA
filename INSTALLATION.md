@@ -43,4 +43,19 @@ O sistema foi estruturado com:
 - O sistema de login ainda está mockado - será necessário implementar endpoint de autenticação no backend
 - Os componentes de CRUD (Companies, Users, etc.) são placeholders e precisam ser implementados
 - A tela de cadastro inicial cria empresa e usuário super_admin automaticamente
+- As variáveis ​​de ambiente são configuradas automaticamente no `docker-compose.yml`
+
+## 🐳 Executando com Docker (Recomendado)
+
+Para executar todo o ambiente com Docker e Docker Compose:
+
+1. Certifique-se de ter Docker e Docker Compose instalados.
+2. Na raiz do projeto, execute:
+```bash
+docker-compose up --build
+```
+3. O sistema estará disponível em:
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:3001
+   - Banco de Dados: localhost:5432
 
