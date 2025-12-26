@@ -1,29 +1,32 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: sga_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  #postgres:
+  #  image: postgres:15-alpine
+  #  environment:
+  #    POSTGRES_USER: user
+  #    POSTGRES_PASSWORD: password
+  #    POSTGRES_DB: sga_db
+  #  ports:
+  #    - "5432:5432"
+  #  volumes:
+  #    - postgres_data:/var/lib/postgresql/data
 
   backend:
     build: ./backend
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=postgres://user:password@postgres:5432/sga_db
+      - DATABASE_NAME=${DB_NAME}
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_URL}:5432/${DB_NAME}
       - JWT_SECRET=dev_secret_key_123
     ports:
       - "3001:3001"
-    depends_on:
-      - postgres
-    command: sh -c "until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done; npm run migrate && node --watch app.js"
+    #depends_on:
+    #postgres
+    command: sh -c "sleep 2; node --watch app.js"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -40,5 +43,5 @@ services:
       - ./:/app
       - /app/node_modules
 
-volumes:
-  postgres_data:
+#volumes:
+  #postgres_data:
